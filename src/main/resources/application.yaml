@@ -1,3 +1,64 @@
 spring:
   application:
     name: project_pulse_backend
+
+  datasource:
+    url: ${MySQL_URL}
+    username: root
+    password: ${MySQL_PASSWORD}
+
+  main:
+    banner-mode: off
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  ai:
+    openai:
+      api-key: ${API_KEY}
+      chat:
+        base-url: https://generativelanguage.googleapis.com
+        completions-path: /v1beta/openai/chat/completions
+        options:
+          model: gemini-2.5-flash
+    retry:
+      max-attempts: 3
+      backoff:
+        initial-interval: 30s
+        multiplier: 2
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+
+logging:
+  level:
+    root: warn
+
+app:
+  cloud:
+    name: ${CLOUD_NAME}
+    key: ${CLOUD_KEY}
+    secret: ${CLOUD_SECRET}
+
+  domain:
+    frontend: ${FRONTEND_DOMAIN}
+
+jwt:
+  secretKey: ${SECRET_KEY}
+  expirationTime: 3600
+
+outbound:
+  identity:
+    client-id: ${CLIENT_ID}
+    client-secret: ${GOOGLE_KEY}
+    redirect-uri: ${URL_REDIRECT}
+    grant-types: authorization_code
