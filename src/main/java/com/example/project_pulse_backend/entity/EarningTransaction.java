@@ -25,11 +25,15 @@ public class EarningTransaction {
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private User employee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reference_transaction_id")
     private EarningTransaction referenceTransaction;
 
     @Column(nullable = false)
-    private Float points;
+    private BigDecimal points;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "earning_transaction_type", nullable = false)

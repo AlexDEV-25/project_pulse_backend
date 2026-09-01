@@ -4,7 +4,9 @@ import com.example.project_pulse_backend.constant.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "tasks")
@@ -32,21 +34,24 @@ public class Task {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @OneToMany(
+            mappedBy = "task",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<TaskAssignment> assignments;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "task_status", nullable = false)
     private TaskStatus taskStatus;
 
     @Column(name = "task_point", nullable = false)
-    private Integer taskPoint;
+    private BigDecimal taskPoint;
 
-    @Column(name = "progress")
-    private Integer progress;
-
-    @Lob
-    @Column(name = "note")
-    private String note;
+    @OneToMany(
+            mappedBy = "task",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<TaskNote> notes;
 }

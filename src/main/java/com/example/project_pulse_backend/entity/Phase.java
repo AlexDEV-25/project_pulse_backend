@@ -1,5 +1,6 @@
 package com.example.project_pulse_backend.entity;
 
+import com.example.project_pulse_backend.constant.AllocationPlanStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,4 +34,12 @@ public class Phase {
 
     @Column(name = "workdays", nullable = false)
     private Integer workdays;
+
+    @ManyToOne
+    @JoinColumn(name = "pm_id", nullable = false)
+    private User pm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private AllocationPlanStatus status;
 }

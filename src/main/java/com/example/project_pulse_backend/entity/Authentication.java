@@ -24,7 +24,7 @@ public class Authentication {
 
     @Column(name = "forgot_password_code")
     private String forgotPasswordCode;
-
+    
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;

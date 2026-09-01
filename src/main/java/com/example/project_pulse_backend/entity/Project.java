@@ -1,10 +1,10 @@
 package com.example.project_pulse_backend.entity;
 
-import com.example.project_pulse_backend.constant.AllocationStatus;
 import com.example.project_pulse_backend.constant.ProjectStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,8 +24,8 @@ public class Project {
     private String projectName;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "pm_id", nullable = false)
+    private User pm;
 
     @Column(name = "start_at")
     private LocalDateTime startAt;
@@ -34,10 +34,10 @@ public class Project {
     private LocalDateTime endAt;
 
     @Column(name = "client_budget")
-    private Float clientBudget;
+    private BigDecimal clientBudget;
 
     @Column(name = "project_budget")
-    private Float projectBudget;
+    private BigDecimal projectBudget;
 
     @Lob
     @Column(name = "description")
