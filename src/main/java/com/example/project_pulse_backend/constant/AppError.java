@@ -41,7 +41,9 @@ public enum AppError {
 
     FAILED_TO_PARSE_DATA(1045, "Không thể phân tích dữ liệu", HttpStatus.BAD_REQUEST),
 
-    INVALID_JSON_FORMAT(1046, "Dữ liệu JSON không hợp lệ", HttpStatus.BAD_REQUEST);
+    INVALID_JSON_FORMAT(1046, "Dữ liệu JSON không hợp lệ", HttpStatus.BAD_REQUEST),
+    
+    DEPARTMENT_NOT_FOUND(1, "Không tìm thấy phòng ban", HttpStatus.BAD_REQUEST);
 
 
     private final int code;

@@ -26,10 +26,21 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS_POST = {
-            "/api/authentication"
+            "/api/authentication",
+            "/api/department",
     };
 
-    private final String[] PUBLIC_ENDPOINTS_GET = {};
+    private final String[] PUBLIC_ENDPOINTS_GET = {
+            "/api/department",
+    };
+
+    private final String[] PUBLIC_ENDPOINTS_PUT = {
+            "/api/department/**",
+    };
+
+    private final String[] PUBLIC_ENDPOINTS_DELETE = {
+            "/api/department/**",
+    };
 
     private final CustomJwtDecoder customJwtDecoder;
 
@@ -42,6 +53,8 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(request -> //
                 request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()//
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()//
+                        .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINTS_PUT).permitAll()//
+                        .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS_DELETE).permitAll()//
                         .anyRequest().authenticated());
 
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)

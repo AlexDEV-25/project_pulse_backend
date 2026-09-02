@@ -2,7 +2,10 @@ package com.example.project_pulse_backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
@@ -14,11 +17,10 @@ import lombok.*;
 @Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "name")
 public class Permission {
-	@Id
-	@Column(name = "name", nullable = false)
-	private String name;
+    @Id
+    @Column(name = "name", nullable = false)
+    private String name;
 
-	@Lob
-	@Column(name = "description")
-	private String description;
+    @Column(name = "description", length = 500)
+    private String description;
 }

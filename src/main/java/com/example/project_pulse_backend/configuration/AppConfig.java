@@ -7,19 +7,11 @@ import com.example.project_pulse_backend.repository.RoleRepo;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
 @Configuration
 public class AppConfig {
-
-    @Bean
-    RestTemplate restTemplate() {
-        // dùng để gọi api từ spring
-        // đang dùng trong fileManager
-        return new RestTemplate();
-    }
 
     @Bean
     ApplicationRunner applicationRunner(RoleRepo roleRepository, PermissionRepo permissionRepository) {
