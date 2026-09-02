@@ -8,12 +8,12 @@ import com.example.project_pulse_backend.entity.Department;
 import com.example.project_pulse_backend.entity.Role;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
+import com.example.project_pulse_backend.helper.GetUserByToken;
 import com.example.project_pulse_backend.repository.AuthenticationRepo;
 import com.example.project_pulse_backend.repository.DepartmentRepo;
 import com.example.project_pulse_backend.repository.RoleRepo;
 import com.example.project_pulse_backend.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +27,8 @@ public class AuthenticationService {
     private final UserRepo userRepo;
     private final DepartmentRepo departmentRepo;
     private final PasswordEncoder passwordEncoder;
-//    private final GetUserByToken getUserByToken;
-    
+    private final GetUserByToken getUserByToken;
+
     public CreateAccountResponse createAccount(CreateAccountRequest request) {
 
         if (authenticationRepo.existsByEmail(request.getEmail())) {

@@ -1,12 +1,12 @@
 package com.example.project_pulse_backend.dto.request;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -36,7 +36,7 @@ public class CreateAccountRequest {
     @NotNull(message = "Resource rate không được để trống")
     @DecimalMin(value = "0.0", inclusive = true, message = "Resource rate không được nhỏ hơn 0")
     @DecimalMax(value = "100.0", inclusive = true, message = "Resource rate không được lớn hơn 100")
-    private Float resourceRate;
+    private BigDecimal resourceRate;
 
     @NotNull(message = "DepartmentId không được để trống")
     @Positive(message = "DepartmentId phải là số dương")
