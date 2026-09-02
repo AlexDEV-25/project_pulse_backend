@@ -29,7 +29,12 @@ public class Allocation {
     @JoinColumn(name = "employee_id", nullable = false)
     private User employee;
 
+    // resourceRateSnapshot =  User.resourceRate tại thời điểm phân bổ (bất biến trong suốt phase)
     @Column(name = "resource_rate_snapshot")
     private BigDecimal resourceRateSnapshot;
+
+    // allocationPoint = Phase.workdays resourceRateSnapshot * allocationPercentage / 100
+    @Column(name = "allocation point")
+    private BigDecimal allocationPoint;
 
 }

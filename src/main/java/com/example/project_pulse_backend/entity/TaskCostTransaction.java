@@ -26,9 +26,11 @@ public class TaskCostTransaction {
     @JoinColumn(name = "executor_id", nullable = false)
     private User executor;
 
+    // points = workdays * Allocation.resourceRateSnapshot
     @Column(name = "points", nullable = false)
     private BigDecimal points;
 
+    // workdays = tổng TaskNote.workingHours / 8
     @Column(name = "workdays", nullable = false)
     private Integer workdays;
 

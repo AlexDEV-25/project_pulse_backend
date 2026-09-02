@@ -3,8 +3,6 @@ package com.example.project_pulse_backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(
         name = "task_assignment",
@@ -35,21 +33,7 @@ public class TaskAssignment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // % thời gian/effort thực tế mà nhân viên dành cho task.
-    @Column(name = "effort_percentage", nullable = false)
-    private Integer effortPercentage;
-
-    /**
-     * % đóng góp của nhân viên vào kết quả cuối cùng của task.
-     * Tổng contributionPercentage của các thành viên trong task
-     * nên bằng 100% khi task hoàn thành.
-     */
+    // % đóng góp của nhân viên vào kết quả cuối cùng của task.
     @Column(name = "contribution_percentage", nullable = false)
     private Integer contributionPercentage;
-
-    /**
-     * Số ngày thực tế nhân viên đã làm task.
-     */
-    @Column(name = "worked_days", precision = 10, scale = 2)
-    private BigDecimal workedDays;
 }

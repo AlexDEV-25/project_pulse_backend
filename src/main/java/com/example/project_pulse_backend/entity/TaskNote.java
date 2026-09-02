@@ -24,12 +24,16 @@ public class TaskNote {
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     @Lob
     @Column(name = "content", nullable = false)
     private String content;
+
+    // số giờ làm thực tế của nhân viên cho task trong ngày.
+    @Column(name = "working_hours", nullable = false)
+    private Integer workingHours;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

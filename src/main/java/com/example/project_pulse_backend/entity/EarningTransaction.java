@@ -1,7 +1,6 @@
 package com.example.project_pulse_backend.entity;
 
 import com.example.project_pulse_backend.constant.EarningTransactionType;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +31,7 @@ public class EarningTransaction {
     @JoinColumn(name = "reference_transaction_id")
     private EarningTransaction referenceTransaction;
 
+    // points =  contributionPercentage * Task.taskPoint
     @Column(nullable = false)
     private BigDecimal points;
 
