@@ -16,25 +16,25 @@ public class DepartmentController {
     private DepartmentService departmentService;
 
     @PostMapping
-    public APIResponse<DepartmentResponse> create(@RequestBody @Valid CreateDepartmentRequest request) {
+    public APIResponse<DepartmentResponse> createDepartment(@RequestBody @Valid CreateDepartmentRequest request) {
         return APIResponse.<DepartmentResponse>builder()
                 .result(departmentService.createDepartment(request)).build();
     }
 
     @PutMapping("/{id}")
-    public APIResponse<DepartmentResponse> update(@PathVariable Long id, @RequestBody @Valid UpdateDepartmentRequest request) {
+    public APIResponse<DepartmentResponse> updateDepartment(@PathVariable Long id, @RequestBody @Valid UpdateDepartmentRequest request) {
         return APIResponse.<DepartmentResponse>builder()
                 .result(departmentService.updateDepartment(id, request)).build();
     }
 
     @DeleteMapping("/{id}")
-    public APIResponse<Void> delete(@PathVariable Long id) {
+    public APIResponse<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return APIResponse.<Void>builder().build();
     }
 
     @GetMapping
-    public APIResponse<DepartmentResponse> findAll() {
+    public APIResponse<DepartmentResponse> getAllDepartments() {
         return APIResponse.<DepartmentResponse>builder()
                 .resultList(departmentService.getAllDepartments()).build();
     }

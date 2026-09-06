@@ -8,6 +8,7 @@ import com.example.project_pulse_backend.entity.Department;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.repository.DepartmentRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +18,13 @@ import java.util.List;
 public class DepartmentService {
     private final DepartmentRepo departmentRepo;
 
+    @PreAuthorize("hasAuthority('CREATE_DEPARTMENT')")
     public DepartmentResponse createDepartment(CreateDepartmentRequest request) {
         Department newDepartment = departmentRepo.save(Department.builder().departmentName(request.getDepartmentName()).hidden(false).build());
         return DepartmentResponse.builder().id(newDepartment.getId()).departmentName(newDepartment.getDepartmentName()).hidden(newDepartment.isHidden()).build();
     }
 
+    @PreAuthorize("hasAuthority('UPDATE_DEPARTMENT')")
     public DepartmentResponse updateDepartment(Long id, UpdateDepartmentRequest request) {
 
         Department entity = departmentRepo.findById(id).orElseThrow(
@@ -35,6 +38,7 @@ public class DepartmentService {
         return DepartmentResponse.builder().id(result.getId()).departmentName(result.getDepartmentName()).hidden(result.isHidden()).build();
     }
 
+    @PreAuthorize("hasAuthority('DELETE_DEPARTMENT')")
     public void deleteDepartment(Long id) {
         departmentRepo.deleteById(id);
     }

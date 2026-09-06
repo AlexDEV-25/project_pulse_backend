@@ -48,7 +48,11 @@ app:
     name: ${CLOUD_NAME}
     key: ${CLOUD_KEY}
     secret: ${CLOUD_SECRET}
-
+  email:
+    url: ${EMAIL_URL}
+    api-key: ${EMAIL_KEY}
+    sender-email: ${SENDER_EMAIL}
+    sender-name: ${SENDER_NAME}
   domain:
     frontend: ${FRONTEND_DOMAIN}
 

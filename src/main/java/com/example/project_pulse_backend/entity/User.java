@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -34,9 +33,6 @@ public class User {
 
     @Column(name = "avatar_url")
     private String avatarUrl;
-
-    @Column(name = "hidden")
-    private boolean hidden;
 
     @ManyToOne
     @JoinColumn(name = "department_id", nullable = false)
