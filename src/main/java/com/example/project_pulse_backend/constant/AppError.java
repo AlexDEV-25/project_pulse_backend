@@ -52,7 +52,10 @@ public enum AppError {
     ACCOUNT_NOT_FOUND(3, "Không tìm thấy tài khoản", HttpStatus.NOT_FOUND),
 
     INCORRECT_PASSWORD(1047, "Mật khẩu không đúng", HttpStatus.UNAUTHORIZED),
-    ROLE_NOT_FOULD(5, "vai trò không tồn tại", HttpStatus.NOT_FOUND),
+    ROLE_NOT_FOUND(5, "vai trò không tồn tại", HttpStatus.NOT_FOUND),
+
+    PROJECT_NOT_FOUND(6, "Không tìm thấy project", HttpStatus.NOT_FOUND),
+    USER_NOT_PM(7, "user không phải pm", HttpStatus.BAD_REQUEST),
     ;
 
 
