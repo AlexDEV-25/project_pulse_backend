@@ -1,6 +1,6 @@
 # Environment Variables
 
-File `src/main/resources/application.yaml` đang dùng các biến môi trường sau.
+File `src/main/resources/application.yaml` đang sử dụng các biến môi trường sau.
 
 ## Danh sách biến
 
@@ -12,6 +12,10 @@ File `src/main/resources/application.yaml` đang dùng các biến môi trườn
 | `CLOUD_NAME` | `app.cloud.name` | Tên cloud storage provider | `cloudinary` |
 | `CLOUD_KEY` | `app.cloud.key` | API key của cloud storage | `123456789012345` |
 | `CLOUD_SECRET` | `app.cloud.secret` | API secret của cloud storage | `cloud-secret-example` |
+| `EMAIL_URL` | `app.email.url` | URL dịch vụ email | `https://api.example.com/email` |
+| `EMAIL_KEY` | `app.email.api-key` | API key của dịch vụ email | `email-api-key-example` |
+| `SENDER_EMAIL` | `app.email.sender-email` | Địa chỉ email người gửi | `noreply@example.com` |
+| `SENDER_NAME` | `app.email.sender-name` | Tên hiển thị của người gửi | `Project Pulse` |
 | `FRONTEND_DOMAIN` | `app.domain.frontend` | Domain của frontend | `http://localhost:3000` |
 | `SECRET_KEY` | `jwt.secretKey` | Secret để ký JWT | `my-super-secret-key-at-least-32-chars` |
 | `CLIENT_ID` | `outbound.identity.client-id` | OAuth client id | `1234567890-abc.apps.googleusercontent.com` |
@@ -27,6 +31,10 @@ API_KEY=sk-proj-example123456789
 CLOUD_NAME=cloudinary
 CLOUD_KEY=123456789012345
 CLOUD_SECRET=cloud-secret-example
+EMAIL_URL=https://api.example.com/email
+EMAIL_KEY=email-api-key-example
+SENDER_EMAIL=noreply@example.com
+SENDER_NAME=Project Pulse
 FRONTEND_DOMAIN=http://localhost:3000
 SECRET_KEY=my-super-secret-key-at-least-32-chars
 CLIENT_ID=1234567890-abc.apps.googleusercontent.com
