@@ -40,6 +40,13 @@ public class AppConfig {
         checkPermissionAndSave(permissionRepository, "GET_MY_INFO", "Employee thực hiện:  lấy thông tin của mình");
         checkPermissionAndSave(permissionRepository, "UPDATE_AVATAR", "Employee thực hiện:  đổi ảnh đại diện");
         checkPermissionAndSave(permissionRepository, "UPDATE_USER", "Admin thực hiện:  update thông tin nhân viên");
+        checkPermissionAndSave(permissionRepository, "CREATE_PROJECT", "Admin thực hiện:  Tạo project");
+        checkPermissionAndSave(permissionRepository, "UPDATE_PROJECT", "Admin thực hiện:  update project");
+        checkPermissionAndSave(permissionRepository, "DELETE_PROJECT", "Admin thực hiện:  delete project");
+        checkPermissionAndSave(permissionRepository, "GET_ALL_PROJECTS", "Admin thực hiện:  lấy toàn bộ project");
+        checkPermissionAndSave(permissionRepository, "GET_ALL_PROJECTS_FOR_PM", "PM thực hiện:  lấy toàn bộ project");
+        checkPermissionAndSave(permissionRepository, "GET_PROJECT_BY_ID", "Admin thực hiện:  lấy project theo id");
+        checkPermissionAndSave(permissionRepository, "GET_PROJECT_BY_ID_FOR_PM", "PM thực hiện:  lấy project theo id");
     }
 
     private void rolesSave(RoleRepo roleRepository, PermissionRepo permissionRepository) {
@@ -109,7 +116,7 @@ public class AppConfig {
             roleRepository.save(Role.builder().name(role).description(description).permissions(permissions).build());
         } else {
             Role entity = roleRepository.findByName(role)
-                    .orElseThrow(() -> AppException.builder().appError(AppError.ROLE_NOT_FOULD).build());
+                    .orElseThrow(() -> AppException.builder().appError(AppError.ROLE_NOT_FOUND).build());
 
             boolean same = new HashSet<>(permissions).equals(new HashSet<>(entity.getPermissions()));
             if (!same) {
