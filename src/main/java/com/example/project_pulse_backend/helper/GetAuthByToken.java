@@ -1,7 +1,7 @@
 package com.example.project_pulse_backend.helper;
 
 import com.example.project_pulse_backend.constant.AppError;
-import com.example.project_pulse_backend.entity.User;
+import com.example.project_pulse_backend.entity.Auth;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.repository.AuthRepo;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class GetUserByToken {
+public class GetAuthByToken {
     private final AuthRepo authenticationRepository;
 
-    public User get() {
+    public Auth get() {
 
         SecurityContext context = SecurityContextHolder.getContext();
 
@@ -38,7 +38,7 @@ public class GetUserByToken {
         }
 
         return authenticationRepository.findByEmail(email).orElseThrow(
-                () -> new AppException(AppError.USER_NOT_FOUND)
-        ).getUser();
+                () -> new AppException(AppError.ACCOUNT_NOT_FOUND)
+        );
     }
 }

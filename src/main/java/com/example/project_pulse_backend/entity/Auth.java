@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Authentication {
+public class Auth {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -24,11 +24,11 @@ public class Authentication {
 
     @Column(name = "forgot_password_code")
     private String forgotPasswordCode;
-    
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "hidden")
-    private boolean hidden;
+    @Column(name = "enabled")
+    private boolean enabled;
 }

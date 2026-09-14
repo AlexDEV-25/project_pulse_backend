@@ -3,7 +3,7 @@ package com.example.project_pulse_backend.helper;
 
 import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.dto.response.IntrospectResponse;
-import com.example.project_pulse_backend.entity.Authentication;
+import com.example.project_pulse_backend.entity.Auth;
 import com.example.project_pulse_backend.entity.Permission;
 import com.example.project_pulse_backend.entity.Role;
 import com.example.project_pulse_backend.entity.User;
@@ -62,7 +62,7 @@ public class JwtHelper {
         return signedJWT;
     }
 
-    public String generateToken(Authentication authentication) {
+    public String generateToken(Auth authentication) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()//
                 .subject(authentication.getEmail())//
