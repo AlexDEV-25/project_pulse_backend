@@ -42,8 +42,18 @@ public enum AppError {
     FAILED_TO_PARSE_DATA(1045, "Không thể phân tích dữ liệu", HttpStatus.BAD_REQUEST),
 
     INVALID_JSON_FORMAT(1046, "Dữ liệu JSON không hợp lệ", HttpStatus.BAD_REQUEST),
-    
-    DEPARTMENT_NOT_FOUND(1, "Không tìm thấy phòng ban", HttpStatus.BAD_REQUEST);
+
+    CANNOT_SEND_EMAIL(1049, "Gửi email thất bại", HttpStatus.BAD_REQUEST),
+
+    DEPARTMENT_NOT_FOUND(1, "Không tìm thấy phòng ban", HttpStatus.NOT_FOUND),
+
+    ACCOUNT_LOCKED(2, "Tài khoản đang bị khóa", HttpStatus.BAD_REQUEST),
+
+    ACCOUNT_NOT_FOUND(3, "Không tìm thấy tài khoản", HttpStatus.NOT_FOUND),
+
+    INCORRECT_PASSWORD(1047, "Mật khẩu không đúng", HttpStatus.UNAUTHORIZED),
+    ROLE_NOT_FOULD(5, "vai trò không tồn tại", HttpStatus.NOT_FOUND),
+    ;
 
 
     private final int code;
