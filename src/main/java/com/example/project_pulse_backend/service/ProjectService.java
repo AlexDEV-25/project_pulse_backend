@@ -1,6 +1,7 @@
 package com.example.project_pulse_backend.service;
 
 import com.example.project_pulse_backend.constant.AppError;
+import com.example.project_pulse_backend.constant.ProjectStatus;
 import com.example.project_pulse_backend.dto.request.CreateProjectRequest;
 import com.example.project_pulse_backend.dto.request.UpdateProjectRequest;
 import com.example.project_pulse_backend.dto.response.ProjectResponse;
@@ -42,7 +43,7 @@ public class ProjectService {
                 .clientBudget(request.getClientBudget())
                 .projectBudget(request.getProjectBudget())
                 .description(request.getDescription())
-                .projectStatus(request.getProjectStatus())
+                .projectStatus(ProjectStatus.DRAFT)
                 .build());
 
         return toResponse(newProject);
@@ -69,7 +70,7 @@ public class ProjectService {
         entity.setClientBudget(request.getClientBudget());
         entity.setProjectBudget(request.getProjectBudget());
         entity.setDescription(request.getDescription());
-        entity.setProjectStatus(request.getProjectStatus());
+        entity.setProjectStatus(ProjectStatus.PLANNING);
 
         return toResponse(projectRepo.save(entity));
     }
