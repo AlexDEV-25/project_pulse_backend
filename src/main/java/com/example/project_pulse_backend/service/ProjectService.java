@@ -8,6 +8,7 @@ import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.GetUserByToken;
+import com.example.project_pulse_backend.helper.TimeHelper;
 import com.example.project_pulse_backend.repository.ProjectRepo;
 import com.example.project_pulse_backend.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class ProjectService {
     private final ProjectRepo projectRepo;
     private final UserRepo userRepo;
     private final GetUserByToken getUserByToken;
+    private final TimeHelper timeHelper;
 
     @PreAuthorize("hasAuthority('CREATE_PROJECT')")
     public ProjectResponse createProject(CreateProjectRequest request) {
@@ -29,6 +31,8 @@ public class ProjectService {
                 () -> AppException.builder().appError(AppError.USER_NOT_FOUND).build()
         );
         checkIsPm(pm);
+
+        timeHelper.checkStartBeforeEnd(request.getStartAt(), request.getEndAt());
 
         Project newProject = projectRepo.save(Project.builder()
                 .projectName(request.getProjectName())
@@ -55,6 +59,8 @@ public class ProjectService {
         );
 
         checkIsPm(pm);
+
+        timeHelper.checkStartBeforeEnd(request.getStartAt(), request.getEndAt());
 
         entity.setProjectName(request.getProjectName());
         entity.setPm(pm);
