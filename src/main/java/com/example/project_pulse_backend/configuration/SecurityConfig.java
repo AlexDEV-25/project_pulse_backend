@@ -26,20 +26,27 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS_POST = {
-            "/api/authentication",
-            "/api/department",
+            "/api/auth/log-in",
+            "/api/auth/log-in-google",
+            "/api/auth/forgot-password",
+            "/api/auth/reset-password",
+            "/api/auth/refresh-token",
+            "/api/auth/introspect",
     };
 
     private final String[] PUBLIC_ENDPOINTS_GET = {
             "/api/department",
+            "/api/users/my-info",
     };
 
     private final String[] PUBLIC_ENDPOINTS_PUT = {
-            "/api/department/**",
+            "/api/auth/admin/toggle-account-status/**",
+            "/api/auth/change-password",
+            "/api/users/update-avatar",
+            "/api/users/admin/update-user",
     };
 
     private final String[] PUBLIC_ENDPOINTS_DELETE = {
-            "/api/department/**",
     };
 
     private final CustomJwtDecoder customJwtDecoder;
