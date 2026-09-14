@@ -36,17 +36,6 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS_GET = {
             "/api/department",
-            "/api/users/my-info",
-    };
-
-    private final String[] PUBLIC_ENDPOINTS_PUT = {
-            "/api/auth/admin/toggle-account-status/**",
-            "/api/auth/change-password",
-            "/api/users/update-avatar",
-            "/api/users/admin/update-user",
-    };
-
-    private final String[] PUBLIC_ENDPOINTS_DELETE = {
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -60,8 +49,6 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(request -> //
                 request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()//
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()//
-                        .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINTS_PUT).permitAll()//
-                        .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS_DELETE).permitAll()//
                         .anyRequest().authenticated());
 
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
