@@ -59,6 +59,8 @@ public enum AppError {
     PHASE_NOT_FOUND(8, "Không tìm thấy phase", HttpStatus.NOT_FOUND),
     INVALID_DATE_RANGE(9, "Ngày bắt đầu phải trước ngày kết thúc", HttpStatus.BAD_REQUEST),
     PHASE_OUT_OF_PROJECT_RANGE(10, "phase phải nằm trong gia đoạn của project", HttpStatus.BAD_REQUEST),
+    PROJECT_MEMBER_NOT_FOUND(11, "Không tìm thấy thành viên dự án", HttpStatus.NOT_FOUND),
+    PROJECT_MEMBER_ALREADY_EXISTS(12, "Thành viên đã tồn tại trong dự án", HttpStatus.CONFLICT),
     ;
 
 
