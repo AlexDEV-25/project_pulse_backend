@@ -29,15 +29,11 @@ public class Phase {
     @Column(name = "end_at")
     private LocalDateTime endAt;
 
-    @Column(name = "phase_name", nullable = false)
+    @Column(name = "phase_name", nullable = false, unique = true)
     private String phaseName;
 
     @Column(name = "workdays", nullable = false)
     private Integer workdays;
-
-    @ManyToOne
-    @JoinColumn(name = "pm_id", nullable = false)
-    private User pm;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
