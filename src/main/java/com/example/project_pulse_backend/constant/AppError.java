@@ -56,6 +56,9 @@ public enum AppError {
 
     PROJECT_NOT_FOUND(6, "Không tìm thấy project", HttpStatus.NOT_FOUND),
     USER_NOT_PM(7, "user không phải pm", HttpStatus.BAD_REQUEST),
+    PHASE_NOT_FOUND(8, "Không tìm thấy phase", HttpStatus.NOT_FOUND),
+    INVALID_DATE_RANGE(9, "Ngày bắt đầu phải trước ngày kết thúc", HttpStatus.BAD_REQUEST),
+    PHASE_OUT_OF_PROJECT_RANGE(10, "phase phải nằm trong gia đoạn của project", HttpStatus.BAD_REQUEST),
     ;
 
 
