@@ -47,6 +47,14 @@ public class AppConfig {
         checkPermissionAndSave(permissionRepository, "GET_ALL_PROJECTS_FOR_PM", "PM thực hiện:  lấy toàn bộ project");
         checkPermissionAndSave(permissionRepository, "GET_PROJECT_BY_ID", "Admin thực hiện:  lấy project theo id");
         checkPermissionAndSave(permissionRepository, "GET_PROJECT_BY_ID_FOR_PM", "PM thực hiện:  lấy project theo id");
+        checkPermissionAndSave(permissionRepository, "CREATE_PHASE", "PM thực hiện:  tạo phase cho dự án");
+        checkPermissionAndSave(permissionRepository, "UPDATE_PHASE", "PM thực hiện:  sửa phase dự án");
+        checkPermissionAndSave(permissionRepository, "DELETE_PHASE", "PM thực hiện:  xóa phase dự án");
+        checkPermissionAndSave(permissionRepository, "GET_ALL_PHASES", "ADMIN thực hiện:  lấy toàn bộ phase của 1 dự án");
+        checkPermissionAndSave(permissionRepository, "GET_PHASE_BY_ID", "ADMIN thực hiện:  lấy chi tiết 1 phase của 1 dự án");
+        checkPermissionAndSave(permissionRepository, "GET_ALL_PHASES_FOR_PM", "PM thực hiện:  lấy toàn bộ phase của 1 dự án cho pm");
+        checkPermissionAndSave(permissionRepository, "GET_PHASE_BY_ID_FOR_PM", "PM thực hiện:  lấy chi tiết 1 phase của 1 dự án cho pm");
+        checkPermissionAndSave(permissionRepository, "UPDATE_PHASE_STATUS", "ADMIN thực hiện:  thay đổi trang thái của 1 phase của 1 dự án cho pm");
     }
 
     private void rolesSave(RoleRepo roleRepository, PermissionRepo permissionRepository) {
