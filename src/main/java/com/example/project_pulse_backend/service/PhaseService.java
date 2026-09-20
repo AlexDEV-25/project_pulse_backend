@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,8 +38,7 @@ public class PhaseService {
         int workdays = request.getWorkdays() ==
                 null ? timeHelper.workdays(request.getStartAt(), request.getEndAt()) : request.getWorkdays();
 
-        timeHelper.checkStartBeforeEnd(request.getStartAt(), request.getEndAt());
-        timeHelper.checkPhaseInProject(request.getStartAt(), request.getEndAt(), project.getStartAt(), project.getEndAt());
+        checkTime(project, request.getStartAt(), request.getEndAt());
 
         Phase newPhase = phaseRepo.save(Phase.builder()
                 .project(project)
@@ -69,8 +69,7 @@ public class PhaseService {
         int workdays = request.getWorkdays() ==
                 null ? timeHelper.workdays(request.getStartAt(), request.getEndAt()) : request.getWorkdays();
 
-        timeHelper.checkStartBeforeEnd(request.getStartAt(), request.getEndAt());
-        timeHelper.checkPhaseInProject(request.getStartAt(), request.getEndAt(), project.getStartAt(), project.getEndAt());
+        checkTime(project, request.getStartAt(), request.getEndAt());
 
         entity.setProject(project);
         entity.setStartAt(request.getStartAt());
@@ -164,5 +163,10 @@ public class PhaseService {
         }
     }
 
+    private void checkTime(Project project, LocalDateTime startAt, LocalDateTime endAt) {
+        timeHelper.checkStartBeforeEnd(startAt, endAt);
+        timeHelper.checkPhaseInMonth(startAt, endAt);
+        timeHelper.checkPhaseInProject(startAt, endAt, project.getStartAt(), project.getEndAt());
+    }
 
 }

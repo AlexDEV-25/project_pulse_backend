@@ -37,6 +37,11 @@ public class TimeHelper {
             throw AppException.builder().appError(AppError.PHASE_OUT_OF_PROJECT_RANGE).build();
 
         }
+    }
 
+    public void checkPhaseInMonth(LocalDateTime startAt, LocalDateTime endAt) {
+        if (startAt.getMonth() != endAt.getMonth() || startAt.getYear() != endAt.getYear()) {
+            throw AppException.builder().appError(AppError.PHASE_NOT_SAME_MONTH).build();
+        }
     }
 }
