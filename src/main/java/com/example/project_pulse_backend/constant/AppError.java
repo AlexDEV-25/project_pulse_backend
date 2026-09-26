@@ -61,8 +61,14 @@ public enum AppError {
     PHASE_OUT_OF_PROJECT_RANGE(10, "phase phải nằm trong gia đoạn của project", HttpStatus.BAD_REQUEST),
     PROJECT_MEMBER_NOT_FOUND(11, "Không tìm thấy thành viên dự án", HttpStatus.NOT_FOUND),
     PROJECT_MEMBER_ALREADY_EXISTS(12, "Thành viên đã tồn tại trong dự án", HttpStatus.CONFLICT),
-    PHASE_NOT_SAME_MONTH(13, "ngày bắt đầu và kết thúc 1 phase phải cùng tháng", HttpStatus.BAD_REQUEST);
+    PHASE_NOT_SAME_MONTH(13, "Phase start and end must be in the same month", HttpStatus.NOT_FOUND),
 
+    ALLOCATION_ALREADY_EXISTS(14, "Allocation already exists for this member in the phase", HttpStatus.CONFLICT),
+
+    MEMBER_NOT_FOUND(15, "nhân viên không có trong dự án", HttpStatus.NOT_FOUND),
+    ALLOCATION_NOT_FOUND(16, "không tìm thấy bản phân bổ", HttpStatus.NOT_FOUND),
+    TOTAL_ALLOCATION_EXCEEDS_100(17, "phân bổ nha viên không vượt quá 100", HttpStatus.BAD_REQUEST),
+    ;
 
     private final int code;
     private final String message;
