@@ -31,6 +31,30 @@ public class TimeHelper {
         }
     }
 
+    public void checkWorkingDateInTask(
+            LocalDateTime workingDate, LocalDateTime taskStartAt, LocalDateTime taskEndAt) {
+        LocalDate workingDay = workingDate.toLocalDate();
+        if ((taskStartAt != null && workingDay.isBefore(taskStartAt.toLocalDate()))
+                || (taskEndAt != null && workingDay.isAfter(taskEndAt.toLocalDate()))) {
+            throw AppException.builder()
+                    .appError(AppError.TASK_NOTE_WORKING_DATE_OUT_OF_RANGE)
+                    .build();
+        }
+    }
+
+    public void checkTaskInPhase(
+            LocalDateTime taskStartAt,
+            LocalDateTime taskEndAt,
+            LocalDateTime phaseStartAt,
+            LocalDateTime phaseEndAt) {
+        if (taskStartAt == null || taskEndAt == null
+                || taskStartAt.isBefore(phaseStartAt) || taskEndAt.isAfter(phaseEndAt)) {
+            throw AppException.builder()
+                    .appError(AppError.TASK_OUT_OF_PHASE_RANGE)
+                    .build();
+        }
+    }
+
     public void checkPhaseInProject(LocalDateTime startAtPhase, LocalDateTime endAtPhase
             , LocalDateTime startAtProject, LocalDateTime endAtProject) {
         if (startAtPhase.isBefore(endAtProject) || startAtProject.isBefore(endAtPhase)) {
