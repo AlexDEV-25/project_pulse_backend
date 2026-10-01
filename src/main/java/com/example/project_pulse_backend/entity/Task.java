@@ -34,6 +34,10 @@ public class Task {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @ManyToOne
+    @JoinColumn(name = "phase_id", nullable = false)
+    private Phase phase;
+
     @OneToMany(
             mappedBy = "task",
             cascade = CascadeType.ALL,
@@ -47,6 +51,10 @@ public class Task {
 
     @Column(name = "task_point", nullable = false)
     private BigDecimal taskPoint;
+
+    @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @OneToMany(
             mappedBy = "task",

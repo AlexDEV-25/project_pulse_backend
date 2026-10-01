@@ -1,6 +1,6 @@
 package com.example.project_pulse_backend.entity;
 
-import com.example.project_pulse_backend.constant.AllocationPlanStatus;
+import com.example.project_pulse_backend.constant.PhaseStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,5 +37,5 @@ public class Phase {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private AllocationPlanStatus status;
+    private PhaseStatus status;
 }

@@ -1,5 +1,6 @@
 package com.example.project_pulse_backend.entity;
 
+import com.example.project_pulse_backend.constant.TaskNoteStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,7 +26,7 @@ public class TaskNote {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    private ProjectMember author;
 
     @Lob
     @Column(name = "content", nullable = false)
@@ -35,9 +36,16 @@ public class TaskNote {
     @Column(name = "working_hours", nullable = false)
     private Integer workingHours;
 
+    @Column(name = "working_date", nullable = false)
+    private LocalDateTime workingDate;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "task_note_status", nullable = false)
+    private TaskNoteStatus taskNoteStatus;
 }

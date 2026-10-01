@@ -24,8 +24,8 @@ public class EarningTransaction {
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
-    private User employee;
+    @JoinColumn(name = "executor_id", nullable = false)
+    private ProjectMember executor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reference_transaction_id")

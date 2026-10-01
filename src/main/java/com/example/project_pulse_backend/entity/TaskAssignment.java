@@ -30,8 +30,8 @@ public class TaskAssignment {
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "employee_id", nullable = false)
+    private ProjectMember employee;
 
     // % đóng góp của nhân viên vào kết quả cuối cùng của task.
     @Column(name = "contribution_percentage", nullable = false)

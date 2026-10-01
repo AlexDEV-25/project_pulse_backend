@@ -24,15 +24,15 @@ public class TaskCostTransaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "executor_id", nullable = false)
-    private User executor;
+    private ProjectMember executor;
 
     // points = workdays * Allocation.resourceRateSnapshot
     @Column(name = "points", nullable = false)
     private BigDecimal points;
 
     // workdays = tổng TaskNote.workingHours / 8
-    @Column(name = "workdays", nullable = false)
-    private Integer workdays;
+    @Column(name = "workdays", nullable = false, precision = 10, scale = 4)
+    private BigDecimal workdays;
 
     @Lob
     @Column(name = "reason")
