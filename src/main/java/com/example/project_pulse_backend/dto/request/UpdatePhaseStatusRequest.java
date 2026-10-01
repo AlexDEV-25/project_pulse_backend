@@ -1,6 +1,6 @@
 package com.example.project_pulse_backend.dto.request;
 
-import com.example.project_pulse_backend.constant.AllocationPlanStatus;
+import com.example.project_pulse_backend.constant.PhaseStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdatePhaseStatusRequest {
     @NotNull(message = "Trang thai phase khong duoc de trong")
-    private AllocationPlanStatus status;
+    private PhaseStatus status;
 }

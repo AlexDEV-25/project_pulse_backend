@@ -1,6 +1,6 @@
 package com.example.project_pulse_backend.dto.response;
 
-import com.example.project_pulse_backend.constant.AllocationPlanStatus;
+import com.example.project_pulse_backend.constant.PhaseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +20,5 @@ public class PhaseResponse {
     private LocalDateTime endAt;
     private String phaseName;
     private Integer workdays;
-    private AllocationPlanStatus status;
+    private PhaseStatus status;
 }

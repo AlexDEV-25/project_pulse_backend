@@ -14,6 +14,9 @@ import java.util.List;
 @Builder
 public class UserResponse {
     private Long id;
+    private Long authId;
+    private boolean enabled;
+    private String email;
     private String userName;
     private String position;
     private BigDecimal resourceRate;
