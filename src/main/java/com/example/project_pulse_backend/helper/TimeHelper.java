@@ -7,10 +7,16 @@ import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class TimeHelper {
-    public int workdays(LocalDateTime startAt, LocalDateTime endAt) {
+
+    public static int workdays(
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            List<LocalDate> makeUpDates,
+            List<LocalDate> offDates) {
         int workingDays = 0;
         LocalDate start = startAt.toLocalDate();
         LocalDate end = endAt.toLocalDate();
@@ -22,16 +28,61 @@ public class TimeHelper {
                 workingDays++;
             }
         }
-        return workingDays;
+        return workingDays + safeSize(makeUpDates) - safeSize(offDates);
     }
 
-    public void checkStartBeforeEnd(LocalDateTime startAt, LocalDateTime endAt) {
+    public static int elapsedWorkdays(
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            LocalDateTime at,
+            List<LocalDate> makeUpDates,
+            List<LocalDate> offDates) {
+        if (!at.isAfter(startAt)) {
+            return 0;
+        }
+
+        LocalDateTime calculationTime = at.isAfter(endAt) ? endAt : at;
+        LocalDate startDate = startAt.toLocalDate();
+        LocalDate calculationDate = calculationTime.toLocalDate();
+        int elapsedWorkdays = 0;
+
+        for (LocalDate date = startDate; !date.isAfter(calculationDate); date = date.plusDays(1)) {
+            DayOfWeek day = date.getDayOfWeek();
+            if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
+                elapsedWorkdays++;
+            }
+        }
+
+        elapsedWorkdays += completedSpecialDates(makeUpDates, startDate, calculationTime);
+        elapsedWorkdays -= completedSpecialDates(offDates, startDate, calculationTime);
+        return elapsedWorkdays;
+    }
+
+    private static int safeSize(List<LocalDate> dates) {
+        return dates == null ? 0 : dates.size();
+    }
+
+    private static int completedSpecialDates(
+            List<LocalDate> dates, LocalDate startDate, LocalDateTime calculationTime) {
+        if (dates == null) {
+            return 0;
+        }
+        LocalDate calculationDate = calculationTime.toLocalDate();
+        return (int) dates.stream()
+                .filter(date -> date != null
+                        && !date.isBefore(startDate)
+                        && !date.isAfter(calculationDate)
+                        && calculationTime.isAfter(date.atStartOfDay()))
+                .count();
+    }
+
+    public static void checkStartBeforeEnd(LocalDateTime startAt, LocalDateTime endAt) {
         if (startAt.isAfter(endAt)) {
             throw AppException.builder().appError(AppError.INVALID_DATE_RANGE).build();
         }
     }
 
-    public void checkWorkingDateInTask(
+    public static void checkWorkingDateInTask(
             LocalDateTime workingDate, LocalDateTime taskStartAt, LocalDateTime taskEndAt) {
         LocalDate workingDay = workingDate.toLocalDate();
         if ((taskStartAt != null && workingDay.isBefore(taskStartAt.toLocalDate()))
@@ -42,7 +93,7 @@ public class TimeHelper {
         }
     }
 
-    public void checkTaskInPhase(
+    public static void checkTaskInPhase(
             LocalDateTime taskStartAt,
             LocalDateTime taskEndAt,
             LocalDateTime phaseStartAt,
@@ -55,17 +106,11 @@ public class TimeHelper {
         }
     }
 
-    public void checkPhaseInProject(LocalDateTime startAtPhase, LocalDateTime endAtPhase
+    public static void checkPhaseInProject(LocalDateTime startAtPhase, LocalDateTime endAtPhase
             , LocalDateTime startAtProject, LocalDateTime endAtProject) {
-        if (startAtPhase.isBefore(endAtProject) || startAtProject.isBefore(endAtPhase)) {
+        if (startAtPhase.isBefore(startAtProject) || endAtPhase.isAfter(endAtProject)) {
             throw AppException.builder().appError(AppError.PHASE_OUT_OF_PROJECT_RANGE).build();
 
-        }
-    }
-
-    public void checkPhaseInMonth(LocalDateTime startAt, LocalDateTime endAt) {
-        if (startAt.getMonth() != endAt.getMonth() || startAt.getYear() != endAt.getYear()) {
-            throw AppException.builder().appError(AppError.PHASE_NOT_SAME_MONTH).build();
         }
     }
 }
