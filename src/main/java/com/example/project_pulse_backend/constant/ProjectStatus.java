@@ -1,5 +1,5 @@
 package com.example.project_pulse_backend.constant;
 
 public enum ProjectStatus {
-    DRAFT, PLANNING, ACTIVE, ON_HOLD, COMPLETED, CANCELLED, FAILED
+    DRAFT, IN_PROGRESS, ON_HOLD, DONE, CANCELLED
 }
