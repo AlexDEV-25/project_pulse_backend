@@ -13,9 +13,9 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -69,27 +69,5 @@ public class EmailHelper {
                 </body></html>
                 """.formatted(forgotPassWordCode, url);
 
-    }
-
-    public String bodyLockAccount() {
-
-        return """
-                <html><body>
-                <h2 style='color:#D0021B'>Thông báo khóa tài khoản</h2>
-                <p>Tài khoản của bạn đã bị khóa vì lý do bảo mật.</p>
-                <p>Nếu bạn có thắc mắc, vui lòng liên hệ ngay với bộ phận hỗ trợ thông qua số 0987654321.</p>
-                </body></html>
-                """;
-
-
-    }
-
-    public String bodyUnLockAccount() {
-        return """ 
-                <html><body>
-                <h2 style='color:#D0021B'>Thông báo mở lại tài khoản</h2>
-                <p>Tài khoản của bạn đã được mở lại.</p>
-                </body></html>
-                """;
     }
 }

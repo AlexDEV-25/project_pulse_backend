@@ -2,18 +2,11 @@ package com.example.project_pulse_backend.helper;
 
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.project_pulse_backend.constant.AppError;
-import com.example.project_pulse_backend.dto.response.FileResponse;
 import com.example.project_pulse_backend.exception.AppException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import com.cloudinary.utils.ObjectUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
@@ -24,45 +17,11 @@ import java.util.UUID;
 public class FileManager {
 
     private final Cloudinary cloudinary;
-    private final RestTemplate restTemplate;
-
-    @Value("${app.cloud.name}")
-    private String cloudName;
-
-    public FileResponse downloadFile(String url) throws Exception {
-
-        ResponseEntity<Resource> response = restTemplate.getForEntity(url, Resource.class);
-
-        Resource resource = response.getBody();
-
-        if (resource == null) {
-            throw new RuntimeException("Không lấy được file");
-        }
-
-        // Lấy InputStream
-        InputStreamResource inputStreamResource = new InputStreamResource(resource.getInputStream());
-
-        // Lấy content-type
-        MediaType mediaType = response.getHeaders().getContentType();
-        if (mediaType == null) {
-            mediaType = MediaType.APPLICATION_OCTET_STREAM;
-        }
-
-        // Lấy content-length
-        long contentLength = response.getHeaders().getContentLength();
-
-        // Lấy tên file từ URL
-        String fileName = url.substring(url.lastIndexOf("/") + 1);
-
-        return new FileResponse(inputStreamResource, contentLength, mediaType, fileName);
-    }
 
     public void deleteFile(String url) throws Exception {
         String publicId = extractPublicId(url);
 
-        cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "image" // ⭐ rất quan
-                // trọng
-        ));
+        cloudinary.uploader().destroy(publicId, ObjectUtils.asMap("resource_type", "image"));
     }
 
     private String fileName(MultipartFile file) {
