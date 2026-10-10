@@ -44,6 +44,10 @@ logging:
     root: warn
 
 app:
+  bootstrap:
+    demo-users:
+      enabled: ${BOOTSTRAP_DEMO_USERS}
+      password: ${BOOTSTRAP_DEMO_PASSWORD}
   cloud:
     name: ${CLOUD_NAME}
     key: ${CLOUD_KEY}
@@ -58,7 +62,7 @@ app:
 
 jwt:
   secretKey: ${SECRET_KEY}
-  expirationTime: 3600
+  expirationTime: 36000
 
 outbound:
   identity:

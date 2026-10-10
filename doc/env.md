@@ -21,6 +21,8 @@ File `src/main/resources/application.yaml` đang dùng các biến môi trườn
 | `CLIENT_ID`       | `outbound.identity.client-id`     | OAuth client id                           | `1234567890-abc.apps.googleusercontent.com`                                          |
 | `GOOGLE_KEY`      | `outbound.identity.client-secret` | OAuth client secret                       | `google-client-secret-example`                                                       |
 | `URL_REDIRECT`    | `outbound.identity.redirect-uri`  | Redirect URI sau khi login OAuth          | `http://localhost:8080/api/oauth2/callback/google`                                   |
+| `BOOTSTRAP_DEMO_USERS` | `app.bootstrap.demo-users.enabled` | Cho phép tạo bốn tài khoản demo khi khởi động; mặc định `false` | `true` (chỉ dùng môi trường local) |
+| `BOOTSTRAP_DEMO_PASSWORD` | `app.bootstrap.demo-users.password` | Mật khẩu cấu hình cho các tài khoản demo; bắt buộc nếu bật seed | Mật khẩu riêng do developer đặt |
 
 ## Gợi ý file `.env`
 
@@ -40,6 +42,7 @@ SECRET_KEY=my-super-secret-key-at-least-32-chars
 CLIENT_ID=1234567890-abc.apps.googleusercontent.com
 GOOGLE_KEY=google-client-secret-example
 URL_REDIRECT=http://localhost:8080/api/oauth2/callback/google
+BOOTSTRAP_DEMO_USERS=false
 ```
 
 ## Ghi chú
@@ -47,3 +50,4 @@ URL_REDIRECT=http://localhost:8080/api/oauth2/callback/google
 - `username` của datasource hiện đang hard-code là `root`, không nằm trong biến môi trường.
 - `jwt.expirationTime` hiện đang cấu hình cố định là `3600`, chưa tách ra biến môi trường.
 - Các URL và key ví dụ ở trên chỉ là giá trị mẫu, cần thay bằng giá trị thật theo môi trường dev/staging/prod.
+- Tài khoản demo không được tự tạo mặc định. Chỉ bật `BOOTSTRAP_DEMO_USERS=true` trên môi trường local và tự đặt `BOOTSTRAP_DEMO_PASSWORD`; không dùng tài khoản demo ở staging hoặc production.
