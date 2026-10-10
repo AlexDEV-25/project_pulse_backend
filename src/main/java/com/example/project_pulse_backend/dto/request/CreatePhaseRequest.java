@@ -8,7 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -28,5 +30,7 @@ public class CreatePhaseRequest {
     @Size(min = 2, max = 100, message = "Ten phase phai tu 2 den 100 ky tu")
     private String phaseName;
 
-    private Integer workdays;
+    private List<LocalDate> makeUpDates;
+    
+    private List<LocalDate> offDates;
 }

@@ -29,6 +29,8 @@ public class UpdateProjectRequest {
     private BigDecimal clientBudget;
     private BigDecimal projectBudget;
     private String description;
+
+    @NotNull(message = "Trạng thái project không được để trống")
     private ProjectStatus projectStatus;
 
 }

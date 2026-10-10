@@ -1,6 +1,5 @@
 package com.example.project_pulse_backend.dto.request;
 
-import com.example.project_pulse_backend.constant.TaskStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -29,15 +28,12 @@ public class CreateTaskRequest {
     private String taskName;
 
     private String description;
-    
+
     @NotNull(message = "Ngày bắt đầu task không được để trống")
     private LocalDateTime startAt;
 
     @NotNull(message = "Ngày kết thúc task không được để trống")
     private LocalDateTime endAt;
-
-    @NotNull(message = "Trạng thái task không được để trống")
-    private TaskStatus taskStatus;
 
     @NotNull(message = "Điểm task không được để trống")
     @DecimalMin(value = "0.0", inclusive = false, message = "Điểm task phải lớn hơn 0")

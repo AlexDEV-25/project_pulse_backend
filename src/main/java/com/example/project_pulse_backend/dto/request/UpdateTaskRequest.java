@@ -19,11 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UpdateTaskRequest {
-    @NotNull(message = "PROJECT_ID không được để trống")
-    private Long projectId;
-
-    @NotNull(message = "PHASE_ID không được để trống")
-    private Long phaseId;
 
     @NotBlank(message = "Tên task không được để trống")
     private String taskName;

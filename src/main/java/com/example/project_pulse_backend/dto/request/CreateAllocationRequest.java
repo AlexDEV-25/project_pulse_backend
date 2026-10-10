@@ -9,8 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateAllocationRequest {
-    @NotNull(message = "PROJECT_ID_REQUIRED")
-    private Long projectId;
 
     @NotNull(message = "PHASE_ID_REQUIRED")
     private Long phaseId;
