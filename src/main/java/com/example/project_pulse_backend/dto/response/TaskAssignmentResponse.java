@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class TaskAssignmentResponse {
+    private Long id;
     private Long employeeId;
     private String employeeName;
     private Integer contributionPercentage;

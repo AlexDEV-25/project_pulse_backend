@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 public class TaskCostTransactionResponse {
     private Long id;
     private Long projectId;
+    private Long phaseId;
+    private String phaseName;
     private Long taskId;
     private String taskName;
     private Long employeeId;

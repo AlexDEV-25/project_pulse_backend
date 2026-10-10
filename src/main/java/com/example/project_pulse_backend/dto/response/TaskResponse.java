@@ -26,5 +26,6 @@ public class TaskResponse {
     private LocalDateTime endAt;
     private TaskStatus taskStatus;
     private BigDecimal taskPoint;
+    private Integer progress;
     private List<TaskAssignmentResponse> assignments;
 }

@@ -6,7 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -19,6 +22,9 @@ public class PhaseResponse {
     private LocalDateTime startAt;
     private LocalDateTime endAt;
     private String phaseName;
+    private List<LocalDate> makeUpDates;
+    private List<LocalDate> offDates;
     private Integer workdays;
     private PhaseStatus status;
+    private BigDecimal progress;
 }

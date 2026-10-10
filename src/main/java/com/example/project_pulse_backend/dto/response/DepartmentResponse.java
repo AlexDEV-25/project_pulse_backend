@@ -13,4 +13,5 @@ public class DepartmentResponse {
     private Long id;
     private String departmentName;
     private boolean hidden;
+    private long employeeCount;
 }

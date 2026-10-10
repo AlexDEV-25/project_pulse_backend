@@ -1,5 +1,6 @@
 package com.example.project_pulse_backend.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,15 +13,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResponse {
     private Long id;
     private Long authId;
-    private boolean enabled;
     private String email;
     private String userName;
     private String position;
     private BigDecimal resourceRate;
     private String avatarUrl;
+    private Long departmentId;
     private String departmentName;
     private List<RoleResponse> roles;
 }

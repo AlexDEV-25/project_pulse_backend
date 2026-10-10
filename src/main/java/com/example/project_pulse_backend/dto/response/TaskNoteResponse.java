@@ -17,6 +17,7 @@ public class TaskNoteResponse {
     private Long taskId;
     private Long employeeId;
     private String employeeName;
+    private String employeeAvatarUrl;
     private String content;
     private Integer workingHours;
     private LocalDateTime workingDate;

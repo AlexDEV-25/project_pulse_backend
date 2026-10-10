@@ -1,10 +1,11 @@
 package com.example.project_pulse_backend.dto.response;
 
-import com.example.project_pulse_backend.constant.ProjectMemberStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -16,5 +17,6 @@ public class ProjectMemberResponse {
     private String projectName;
     private Long userId;
     private String userName;
-    private ProjectMemberStatus status;
+    private BigDecimal userResourceRate;
+    private String userPosition;
 }
