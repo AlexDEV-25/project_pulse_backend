@@ -1,5 +1,7 @@
 package com.example.project_pulse_backend.configuration;
 
+import com.example.project_pulse_backend.entity.Permission;
+import com.example.project_pulse_backend.repository.RoleRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,14 +12,18 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import java.util.LinkedHashSet;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +34,8 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS_POST = {
             "/api/auth/log-in",
             "/api/auth/log-in-google",
+            "/api/auth/select-role",
+            "/api/auth/select-role/google",
             "/api/auth/forgot-password",
             "/api/auth/reset-password",
             "/api/auth/refresh-token",
@@ -35,7 +43,7 @@ public class SecurityConfig {
     };
 
     private final String[] PUBLIC_ENDPOINTS_GET = {
-            "/api/department",
+            "/api/department", "/api/department/{id}",
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -44,17 +52,20 @@ public class SecurityConfig {
     private String frontendDomain;
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain filterChain(
+            HttpSecurity httpSecurity, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         httpSecurity.cors(Customizer.withDefaults());// <-- BẮT BUỘC để CORS hoạt động với Security
         httpSecurity.authorizeHttpRequests(request -> //
                 request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()//
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()//
                         .anyRequest().authenticated());
 
-        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
-                .jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        httpSecurity.oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
+                        .jwtAuthenticationConverter(jwtAuthenticationConverter)));
 
-        httpSecurity.exceptionHandling(ex -> ex.authenticationEntryPoint(new CustomAuthEntryPoint()));
+        httpSecurity.exceptionHandling(ex ->
+                ex.authenticationEntryPoint(new CustomAuthEntryPoint()));
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
@@ -62,12 +73,27 @@ public class SecurityConfig {
     }
 
     @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
-
+    JwtAuthenticationConverter jwtAuthenticationConverter(RoleRepo roleRepo) {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            String selectedRole = jwt.getClaimAsString("role");
+            if (selectedRole == null || selectedRole.isBlank()) {
+                return List.of();
+            }
+            return roleRepo.findByName(selectedRole)
+                    .map(role -> {
+                        LinkedHashSet<GrantedAuthority> authorities = new LinkedHashSet<>();
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + selectedRole));
+                        List<Permission> permissions = role.getPermissions();
+                        if (permissions != null) {
+                            permissions.stream()
+                                    .map(Permission::getName)
+                                    .map(SimpleGrantedAuthority::new)
+                                    .forEach(authorities::add);
+                        }
+                        return List.copyOf(authorities);
+                    }).orElseGet(List::of);
+        });
 
         return jwtAuthenticationConverter;
     }
