@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface DepartmentRepo extends JpaRepository<Department, Long> {
     Optional<Department> findByDepartmentName(String departmentName);
+
+    long countByHidden(boolean hidden);
 }
