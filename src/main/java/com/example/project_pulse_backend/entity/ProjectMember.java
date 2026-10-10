@@ -1,6 +1,5 @@
 package com.example.project_pulse_backend.entity;
 
-import com.example.project_pulse_backend.constant.ProjectMemberStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,7 +34,4 @@ public class ProjectMember {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProjectMemberStatus status;
 }

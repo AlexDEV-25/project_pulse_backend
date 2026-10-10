@@ -45,6 +45,9 @@ public class TaskNote {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "confirmed_at")
+    private LocalDateTime confirmedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "task_note_status", nullable = false)
     private TaskNoteStatus taskNoteStatus;

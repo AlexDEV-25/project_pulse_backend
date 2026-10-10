@@ -4,7 +4,9 @@ import com.example.project_pulse_backend.constant.PhaseStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "phases")
@@ -32,8 +34,21 @@ public class Phase {
     @Column(name = "phase_name", nullable = false, unique = true)
     private String phaseName;
 
-    @Column(name = "workdays", nullable = false)
-    private Integer workdays;
+    @ElementCollection
+    @CollectionTable(
+            name = "phase_make_up_date",
+            joinColumns = @JoinColumn(name = "phase_id")
+    )
+    @Column(name = "date")
+    private List<LocalDate> makeUpDates;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "phase_off_date",
+            joinColumns = @JoinColumn(name = "phase_id")
+    )
+    @Column(name = "date")
+    private List<LocalDate> offDates;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

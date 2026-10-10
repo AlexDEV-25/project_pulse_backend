@@ -31,10 +31,6 @@ public class Task {
     private LocalDateTime endAt;
 
     @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
-
-    @ManyToOne
     @JoinColumn(name = "phase_id", nullable = false)
     private Phase phase;
 

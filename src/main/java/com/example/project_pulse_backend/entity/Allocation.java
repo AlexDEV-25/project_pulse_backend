@@ -18,10 +18,6 @@ public class Allocation {
     @Column(name = "id")
     private Long id;
     
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
-
     @Column(name = "allocation_percentage", nullable = false)
     private Integer allocationPercentage;
 
@@ -36,9 +32,5 @@ public class Allocation {
     // resourceRateSnapshot =  User.resourceRate tại thời điểm phân bổ (bất biến trong suốt phase)
     @Column(name = "resource_rate_snapshot")
     private BigDecimal resourceRateSnapshot;
-
-    // allocationPoint = Phase.workdays resourceRateSnapshot * allocationPercentage / 100
-    @Column(name = "allocation_point")
-    private BigDecimal allocationPoint;
 
 }
