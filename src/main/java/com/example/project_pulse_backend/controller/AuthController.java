@@ -1,7 +1,10 @@
 package com.example.project_pulse_backend.controller;
 
 import com.example.project_pulse_backend.dto.request.*;
-import com.example.project_pulse_backend.dto.response.*;
+import com.example.project_pulse_backend.dto.response.APIResponse;
+import com.example.project_pulse_backend.dto.response.AuthResponse;
+import com.example.project_pulse_backend.dto.response.CreateAccountResponse;
+import com.example.project_pulse_backend.dto.response.IntrospectResponse;
 import com.example.project_pulse_backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -25,10 +28,22 @@ public class AuthController {
                 .result(authenticationService.login(request)).build();
     }
 
+    @PostMapping("/select-role")
+    APIResponse<AuthResponse> selectRole(@RequestBody @Valid SelectRoleRequest request) {
+        return APIResponse.<AuthResponse>builder()
+                .result(authenticationService.selectRole(request)).build();
+    }
+
     @PostMapping("/log-in-google")
     APIResponse<AuthResponse> loginWithGoogle(@RequestParam @Valid String code) {
         return APIResponse.<AuthResponse>builder()
                 .result(authenticationService.loginWithGoogle(code)).build();
+    }
+
+    @PostMapping("/select-role/google")
+    APIResponse<AuthResponse> selectGoogleRole(@RequestBody @Valid SelectGoogleRoleRequest request) {
+        return APIResponse.<AuthResponse>builder()
+                .result(authenticationService.selectGoogleRole(request)).build();
     }
 
     @PostMapping("/forgot-password")
@@ -53,12 +68,6 @@ public class AuthController {
     APIResponse<IntrospectResponse> introspect(@RequestBody @Valid TokenRequest request) {
         return APIResponse.<IntrospectResponse>builder()
                 .result(authenticationService.introspect(request.getToken())).build();
-    }
-
-    @PutMapping("/admin/toggle-account-status/{id}")
-    public APIResponse<Void> toggleAccountStatus(@PathVariable Long id, @RequestBody @Valid DisplayRequest request) {
-        authenticationService.toggleAccountStatus(id, request);
-        return APIResponse.<Void>builder().build();
     }
 
     @PutMapping("change-password")

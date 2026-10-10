@@ -1,5 +1,6 @@
 package com.example.project_pulse_backend.controller;
 
+import com.example.project_pulse_backend.constant.ProjectStatus;
 import com.example.project_pulse_backend.dto.request.CreateProjectRequest;
 import com.example.project_pulse_backend.dto.request.UpdateProjectRequest;
 import com.example.project_pulse_backend.dto.response.APIResponse;
@@ -34,26 +35,18 @@ public class ProjectController {
     }
 
     @GetMapping
-    public APIResponse<ProjectResponse> getAllProjects() {
+    public APIResponse<ProjectResponse> getAllProjects(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long pmId,
+            @RequestParam(required = false) ProjectStatus projectStatus) {
         return APIResponse.<ProjectResponse>builder()
-                .resultList(projectService.getAllProjects()).build();
+                .resultList(projectService.getAllProjects(pmId, keyword, projectStatus)).build();
     }
 
-    @GetMapping("/admin/{id}")
+    @GetMapping("/{id}")
     public APIResponse<ProjectResponse> getProjectByIdForAdmin(@PathVariable Long id) {
         return APIResponse.<ProjectResponse>builder()
-                .result(projectService.getProjectByIdForAdmin(id)).build();
+                .result(projectService.getProjectById(id)).build();
     }
 
-    @GetMapping("/pm/detail/{id}")
-    public APIResponse<ProjectResponse> getProjectByIdForPm(@PathVariable Long id) {
-        return APIResponse.<ProjectResponse>builder()
-                .result(projectService.getProjectByIdForPm(id)).build();
-    }
-
-    @GetMapping("/pm")
-    public APIResponse<ProjectResponse> getAllProjectsForPM() {
-        return APIResponse.<ProjectResponse>builder()
-                .resultList(projectService.getAllProjectsForPM()).build();
-    }
 }

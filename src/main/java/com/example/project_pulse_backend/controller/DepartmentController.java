@@ -4,6 +4,7 @@ import com.example.project_pulse_backend.dto.request.CreateDepartmentRequest;
 import com.example.project_pulse_backend.dto.request.UpdateDepartmentRequest;
 import com.example.project_pulse_backend.dto.response.APIResponse;
 import com.example.project_pulse_backend.dto.response.DepartmentResponse;
+import com.example.project_pulse_backend.dto.response.DepartmentStatisticsResponse;
 import com.example.project_pulse_backend.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -37,5 +38,17 @@ public class DepartmentController {
     public APIResponse<DepartmentResponse> getAllDepartments() {
         return APIResponse.<DepartmentResponse>builder()
                 .resultList(departmentService.getAllDepartments()).build();
+    }
+
+    @GetMapping("/statistics")
+    public APIResponse<DepartmentStatisticsResponse> getDepartmentStatistics() {
+        return APIResponse.<DepartmentStatisticsResponse>builder()
+                .result(departmentService.getDepartmentStatistics()).build();
+    }
+
+    @GetMapping("/{id}")
+    public APIResponse<DepartmentResponse> getDepartmentById(@PathVariable Long id) {
+        return APIResponse.<DepartmentResponse>builder()
+                .result(departmentService.getDepartmentById(id)).build();
     }
 }

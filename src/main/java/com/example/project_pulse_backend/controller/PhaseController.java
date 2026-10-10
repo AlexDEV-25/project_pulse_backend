@@ -2,7 +2,6 @@ package com.example.project_pulse_backend.controller;
 
 import com.example.project_pulse_backend.dto.request.CreatePhaseRequest;
 import com.example.project_pulse_backend.dto.request.UpdatePhaseRequest;
-import com.example.project_pulse_backend.dto.request.UpdatePhaseStatusRequest;
 import com.example.project_pulse_backend.dto.response.APIResponse;
 import com.example.project_pulse_backend.dto.response.PhaseResponse;
 import com.example.project_pulse_backend.service.PhaseService;
@@ -35,32 +34,18 @@ public class PhaseController {
     }
 
     @GetMapping("/project/{projectId}")
-    public APIResponse<PhaseResponse> getAllPhasesByProjectForAdmin(@PathVariable Long projectId) {
+    public APIResponse<PhaseResponse> getAllPhasesByProject(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) String keyword) {
         return APIResponse.<PhaseResponse>builder()
-                .resultList(phaseService.getAllPhasesByProjectForAdmin(projectId)).build();
+                .resultList(phaseService.getAllPhasesByProject(projectId, keyword)).build();
     }
 
-    @GetMapping("/project/{projectId}/detail/{phaseId}")
-    public APIResponse<PhaseResponse> getPhaseByProjectForAdmin(@PathVariable Long projectId, @PathVariable Long phaseId) {
+    @GetMapping("/detail/{phaseId}")
+    public APIResponse<PhaseResponse> getPhaseByProject(@PathVariable Long phaseId) {
         return APIResponse.<PhaseResponse>builder()
-                .result(phaseService.getPhaseByProjectForAdmin(projectId, phaseId)).build();
+                .result(phaseService.getPhaseById(phaseId)).build();
     }
 
-    @GetMapping("/pm/project/{projectId}")
-    public APIResponse<PhaseResponse> getAllPhasesByProjectForPM(@PathVariable Long projectId) {
-        return APIResponse.<PhaseResponse>builder()
-                .resultList(phaseService.getAllPhasesByProjectForPM(projectId)).build();
-    }
 
-    @GetMapping("/pm/project/{projectId}/detail/{phaseId}")
-    public APIResponse<PhaseResponse> getPhaseByProjectForPM(@PathVariable Long projectId, @PathVariable Long phaseId) {
-        return APIResponse.<PhaseResponse>builder()
-                .result(phaseService.getPhaseByProjectForPM(projectId, phaseId)).build();
-    }
-
-    @PatchMapping("/{id}/status")
-    public APIResponse<PhaseResponse> updatePhaseStatus(@PathVariable Long id, @RequestBody @Valid UpdatePhaseStatusRequest request) {
-        return APIResponse.<PhaseResponse>builder()
-                .result(phaseService.updatePhaseStatus(id, request)).build();
-    }
 }

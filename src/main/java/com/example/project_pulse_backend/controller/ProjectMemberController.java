@@ -1,8 +1,6 @@
 package com.example.project_pulse_backend.controller;
 
 import com.example.project_pulse_backend.dto.request.CreateProjectMemberRequest;
-import com.example.project_pulse_backend.dto.request.UpdateProjectMemberRequest;
-import com.example.project_pulse_backend.dto.request.UpdateProjectMemberStatusRequest;
 import com.example.project_pulse_backend.dto.response.APIResponse;
 import com.example.project_pulse_backend.dto.response.ProjectMemberResponse;
 import com.example.project_pulse_backend.service.ProjectMemberService;
@@ -16,17 +14,19 @@ import org.springframework.web.bind.annotation.*;
 public class ProjectMemberController {
     private ProjectMemberService projectMemberService;
 
-    @PostMapping
-    public APIResponse<ProjectMemberResponse> createProjectMember(@RequestBody @Valid CreateProjectMemberRequest request) {
+    @GetMapping("/project/{projectId}")
+    public APIResponse<ProjectMemberResponse> getMyProjects(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) String keyword) {
         return APIResponse.<ProjectMemberResponse>builder()
-                .result(projectMemberService.createProjectMember(request)).build();
+                .resultList(projectMemberService.getMyProjectMembers(projectId, keyword)).build();
     }
 
-    @PutMapping("/{id}")
-    public APIResponse<ProjectMemberResponse> updateProjectMember(@PathVariable Long id,
-                                                                  @RequestBody @Valid UpdateProjectMemberRequest request) {
+    @PostMapping
+    public APIResponse<ProjectMemberResponse> createProjectMember(
+            @RequestBody @Valid CreateProjectMemberRequest request) {
         return APIResponse.<ProjectMemberResponse>builder()
-                .result(projectMemberService.updateProjectMember(id, request)).build();
+                .result(projectMemberService.createProjectMember(request)).build();
     }
 
     @DeleteMapping("/{id}")
@@ -35,10 +35,4 @@ public class ProjectMemberController {
         return APIResponse.<Void>builder().build();
     }
 
-    @PatchMapping("/{id}/status")
-    public APIResponse<ProjectMemberResponse> updateProjectMemberStatus(@PathVariable Long id,
-                                                                        @RequestBody @Valid UpdateProjectMemberStatusRequest request) {
-        return APIResponse.<ProjectMemberResponse>builder()
-                .result(projectMemberService.updateProjectMemberStatus(id, request)).build();
-    }
 }

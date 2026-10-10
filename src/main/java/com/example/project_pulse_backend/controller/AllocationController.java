@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/allocation")
 @AllArgsConstructor
 public class AllocationController {
-
     private final AllocationService allocationService;
 
     @PostMapping
@@ -26,8 +25,7 @@ public class AllocationController {
     @PutMapping("/{id}")
     public APIResponse<AllocationResponse> updateAllocation(
             @PathVariable Long id,
-            @RequestBody @Valid UpdateAllocationRequest request
-    ) {
+            @RequestBody @Valid UpdateAllocationRequest request) {
         return APIResponse.<AllocationResponse>builder()
                 .result(allocationService.updateAllocation(id, request))
                 .build();
@@ -37,5 +35,22 @@ public class AllocationController {
     public APIResponse<Void> deleteAllocation(@PathVariable Long id) {
         allocationService.deleteAllocation(id);
         return APIResponse.<Void>builder().build();
+    }
+
+    @GetMapping("/{projectId}")
+    public APIResponse<AllocationResponse> getAllocationsByProjectId(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) Long phaseId,
+            @RequestParam(required = false) String keyword) {
+        return APIResponse.<AllocationResponse>builder()
+                .resultList(allocationService.getAllocationsByProjectId(projectId, phaseId, keyword))
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    public APIResponse<AllocationResponse> getAllocationById(@PathVariable Long id) {
+        return APIResponse.<AllocationResponse>builder()
+                .result(allocationService.getAllocationById(id))
+                .build();
     }
 }
