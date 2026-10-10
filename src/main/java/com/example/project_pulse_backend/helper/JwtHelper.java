@@ -6,7 +6,6 @@ import com.example.project_pulse_backend.dto.response.IntrospectResponse;
 import com.example.project_pulse_backend.entity.Auth;
 import com.example.project_pulse_backend.entity.Permission;
 import com.example.project_pulse_backend.entity.Role;
-import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -19,10 +18,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class JwtHelper {
@@ -48,11 +44,14 @@ public class JwtHelper {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date epx = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
         boolean verified = signedJWT.verify(verifier);
 
-        if (!epx.after(new Date())) {
+        if (expirationTime == null) {
+            throw AppException.builder().appError(AppError.INVALID_TOKEN).build();
+        }
+        if (!expirationTime.after(new Date())) {
             throw AppException.builder().appError(AppError.TOKEN_EXPIRED).build();
         }
         if (!verified) {
@@ -62,15 +61,31 @@ public class JwtHelper {
         return signedJWT;
     }
 
-    public String generateToken(Auth authentication) {
+    public String generateToken(Auth authentication, String roleName) {
+        if (authentication.getUser() == null || authentication.getUser().getRoles() == null
+                || authentication.getUser().getRoles().isEmpty()) {
+            throw AppException.builder().appError(AppError.ACCESS_DENIED).build();
+        }
+
+        List<Role> roles = authentication.getUser().getRoles();
+        if (roleName != null && roles.stream().noneMatch(role -> Objects.equals(role.getName(), roleName))) {
+            throw AppException.builder().appError(AppError.ACCESS_DENIED).build();
+        }
+        List<String> roleNames = roles.stream().map(Role::getName).distinct().toList();
+
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()//
+        JWTClaimsSet.Builder claims = new JWTClaimsSet.Builder()//
                 .subject(authentication.getEmail())//
                 .issuer("moimoi.com")//
-                .claim("scope", buildScope(authentication.getUser()))//
+                .claim("roles", roleNames)//
+                .claim("scope", buildScope(roles, roleName))//
                 .jwtID(UUID.randomUUID().toString())//
                 .issueTime(new Date())//
-                .expirationTime(Date.from(Instant.now().plus(EXPIRATION_TIME, ChronoUnit.SECONDS))).build();
+                .expirationTime(Date.from(Instant.now().plus(EXPIRATION_TIME, ChronoUnit.SECONDS)));
+        if (roleName != null) {
+            claims.claim("role", roleName);
+        }
+        JWTClaimsSet jwtClaimsSet = claims.build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
@@ -85,16 +100,23 @@ public class JwtHelper {
         }
     }
 
-    private String buildScope(User user) {
-        StringJoiner stringJoiner = new StringJoiner(" ");
-        List<Role> roles = user.getRoles();
-        for (Role role : roles) {
-            stringJoiner.add("ROLE_" + role.getName());
-            List<Permission> permissions = role.getPermissions();
+    private String buildScope(List<Role> roles, String roleName) {
+        LinkedHashSet<String> authorities = new LinkedHashSet<>();
+        if (roleName == null) {
+            return "";
+        }
+
+        Role selectedRole = roles.stream()
+                .filter(role -> Objects.equals(role.getName(), roleName))
+                .findFirst()
+                .orElseThrow(() -> AppException.builder().appError(AppError.ACCESS_DENIED).build());
+        authorities.add("ROLE_" + selectedRole.getName());
+        List<Permission> permissions = selectedRole.getPermissions();
+        if (permissions != null) {
             for (Permission permission : permissions) {
-                stringJoiner.add(permission.getName());
+                authorities.add(permission.getName());
             }
         }
-        return stringJoiner.toString();
+        return String.join(" ", authorities);
     }
 }
