@@ -5,154 +5,298 @@ import com.example.project_pulse_backend.dto.request.CreateAccountRequest;
 import com.example.project_pulse_backend.entity.*;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 public class AppConfig {
+    @Value("${app.bootstrap.demo-users.enabled:false}")
+    private boolean seedDemoUsers;
+
+    @Value("${app.bootstrap.demo-users.password}")
+    private String demoUserPassword;
 
     @Bean
     ApplicationRunner applicationRunner(RoleRepo roleRepository, PermissionRepo permissionRepository,
                                         DepartmentRepo departmentRepository, UserRepo userRepository, AuthRepo authRepository,
                                         PasswordEncoder passwordEncoder) {
         return args -> {
-            permissionsSave(permissionRepository);
-            rolesSave(roleRepository, permissionRepository);
+            List<Permission> permissions = permissionsSave(permissionRepository);
+            rolesSave(roleRepository, permissions);
             departmentSave(departmentRepository);
-            userSave(userRepository, authRepository, departmentRepository, roleRepository, passwordEncoder);
+            if (seedDemoUsers) {
+                userSave(userRepository, authRepository, departmentRepository, roleRepository,
+                        passwordEncoder, demoUserPassword);
+            }
         };
     }
 
-    private void permissionsSave(PermissionRepo permissionRepository) {
-        checkPermissionAndSave(permissionRepository, "CREATE_ACCOUNT", "Admin thực hiện:  Tạo tài khoản");
-        checkPermissionAndSave(permissionRepository, "TOGGLE_ACCOUNT_STATUS",
-                "Admin thực hiện:  Khóa / mở khóa tài khoản");
-        checkPermissionAndSave(permissionRepository, "CHANGE_PASSWORD", "Employee thực hiện:  đổi mật khẩu");
-        checkPermissionAndSave(permissionRepository, "CREATE_DEPARTMENT", "Admin thực hiện:  Tạo phòng ban");
-        checkPermissionAndSave(permissionRepository, "UPDATE_DEPARTMENT", "Admin thực hiện: update phòng ban");
-        checkPermissionAndSave(permissionRepository, "DELETE_DEPARTMENT", "Admin thực hiện:  xóa phòng ban");
-        checkPermissionAndSave(permissionRepository, "GET_ALL_USERS", "Admin thực hiện:  lấy toàn bộ nhân viên");
-        checkPermissionAndSave(permissionRepository, "GET_ALL_USERS_FOR_PM", "PM thực hiện:  lấy toàn bộ nhân viên");
-        checkPermissionAndSave(permissionRepository, "GET_MY_INFO", "Employee thực hiện:  lấy thông tin của mình");
-        checkPermissionAndSave(permissionRepository, "UPDATE_AVATAR", "Employee thực hiện:  đổi ảnh đại diện");
-        checkPermissionAndSave(permissionRepository, "UPDATE_USER", "Admin thực hiện:  update thông tin nhân viên");
-        checkPermissionAndSave(permissionRepository, "CREATE_PROJECT", "Admin thực hiện:  Tạo project");
-        checkPermissionAndSave(permissionRepository, "UPDATE_PROJECT", "Admin thực hiện:  update project");
-        checkPermissionAndSave(permissionRepository, "DELETE_PROJECT", "Admin thực hiện:  delete project");
-        checkPermissionAndSave(permissionRepository, "GET_ALL_PROJECTS", "Admin thực hiện:  lấy toàn bộ project");
-        checkPermissionAndSave(permissionRepository, "GET_ALL_PROJECTS_FOR_PM", "PM thực hiện:  lấy toàn bộ project");
-        checkPermissionAndSave(permissionRepository, "GET_PROJECT_BY_ID", "Admin thực hiện:  lấy project theo id");
-        checkPermissionAndSave(permissionRepository, "GET_PROJECT_BY_ID_FOR_PM", "PM thực hiện:  lấy project theo id");
-        checkPermissionAndSave(permissionRepository, "CREATE_PHASE", "PM thực hiện:  tạo phase cho dự án");
-        checkPermissionAndSave(permissionRepository, "UPDATE_PHASE", "PM thực hiện:  sửa phase dự án");
-        checkPermissionAndSave(permissionRepository, "DELETE_PHASE", "PM thực hiện:  xóa phase dự án");
-        checkPermissionAndSave(permissionRepository, "GET_ALL_PHASES",
-                "ADMIN thực hiện:  lấy toàn bộ phase của 1 dự án");
-        checkPermissionAndSave(permissionRepository, "GET_PHASE_BY_ID",
-                "ADMIN thực hiện:  lấy chi tiết 1 phase của 1 dự án");
-        checkPermissionAndSave(permissionRepository, "GET_ALL_PHASES_FOR_PM",
-                "PM thực hiện:  lấy toàn bộ phase của 1 dự án cho pm");
-        checkPermissionAndSave(permissionRepository, "GET_PHASE_BY_ID_FOR_PM",
-                "PM thực hiện:  lấy chi tiết 1 phase của 1 dự án cho pm");
-        checkPermissionAndSave(permissionRepository, "GET_EVM_ADMIN", "Admin thực hiện: xem chỉ số EVM");
-        checkPermissionAndSave(permissionRepository, "GET_EVM_PM", "PM thực hiện: xem chỉ số EVM");
-        checkPermissionAndSave(permissionRepository, "UPDATE_PHASE_STATUS",
-                "Admin thực hiện: thay đổi trạng thái phase");
-        checkPermissionAndSave(permissionRepository, "UPDATE_PHASE_STATUS_FOR_PM",
-                "PM thực hiện: thay đổi trạng thái phase của dự án mình quản lý");
-        checkPermissionAndSave(permissionRepository, "CREATE_PROJECT_MEMBER", "PM thực hiện: thêm thành viên dự án");
-        checkPermissionAndSave(permissionRepository, "UPDATE_PROJECT_MEMBER", "PM thực hiện: sửa thành viên dự án");
-        checkPermissionAndSave(permissionRepository, "DELETE_PROJECT_MEMBER", "PM thực hiện: xóa thành viên dự án");
-        checkPermissionAndSave(permissionRepository, "GET_MY_PROJECTS",
-                "Employee thực hiện: xem project đã được duyệt tham gia");
-        checkPermissionAndSave(permissionRepository, "UPDATE_PROJECT_MEMBER_STATUS",
-                "ADMIN thực hiện: thay đổi trạng thái thành viên dự án");
-        checkPermissionAndSave(permissionRepository, "CREATE_TASK", "PM thực hiện: tạo task cho dự án");
-        checkPermissionAndSave(permissionRepository, "UPDATE_TASK", "PM thực hiện: cập nhật task của dự án");
-        checkPermissionAndSave(permissionRepository, "DELETE_TASK", "PM thực hiện: xóa task của dự án");
-        checkPermissionAndSave(permissionRepository, "GET_TASKS_BY_PROJECT",
-                "PM thực hiện: lấy danh sách task của dự án");
-        checkPermissionAndSave(permissionRepository, "GET_TASKS_BY_EMPLOYEE",
-                "PM thực hiện: lấy danh sách task của nhân viên");
-        checkPermissionAndSave(permissionRepository, "GET_TASK_BY_ID_FOR_PM", "PM thực hiện: xem chi tiết task");
-        checkPermissionAndSave(permissionRepository, "GET_MY_ASSIGNED_TASKS",
-                "Employee thực hiện: xem danh sách task được giao");
-        checkPermissionAndSave(permissionRepository, "GET_MY_ASSIGNED_TASK_BY_ID",
-                "Employee thực hiện: xem chi tiết task được giao");
-        checkPermissionAndSave(permissionRepository, "GET_MY_ALLOCATIONS",
-                "Employee thực hiện: xem phân bổ công việc của mình");
-        checkPermissionAndSave(permissionRepository, "UPDATE_TASK_ASSIGNMENT",
-                "PM thực hiện: cập nhật tỷ lệ đóng góp của nhân viên trong task");
-        checkPermissionAndSave(permissionRepository, "CREATE_TASK_NOTE", "Employee thực hiện: tạo task note");
-        checkPermissionAndSave(permissionRepository, "UPDATE_TASK_NOTE", "Employee thực hiện: sửa task note của mình");
-        checkPermissionAndSave(permissionRepository, "DELETE_TASK_NOTE", "Employee thực hiện: xóa task note của mình");
-        checkPermissionAndSave(permissionRepository, "GET_TASK_NOTES_FOR_PM", "PM thực hiện: xem toàn bộ task note");
-        checkPermissionAndSave(permissionRepository, "CONFIRM_TASK_NOTES", "PM thực hiện: xác nhận task note");
-        checkPermissionAndSave(permissionRepository, "GET_TASK_COSTS_BY_TASK_ADMIN",
-                "Admin thực hiện: xem chi phí task");
-        checkPermissionAndSave(permissionRepository, "GET_TASK_COSTS_BY_TASK_FOR_PM", "PM thực hiện: xem chi phí task");
-        checkPermissionAndSave(permissionRepository, "GET_TASK_COSTS_BY_EMPLOYEE_ADMIN",
-                "Admin thực hiện: xem chi phí task của nhân viên");
-        checkPermissionAndSave(permissionRepository, "GET_TASK_COSTS_BY_EMPLOYEE_FOR_PM",
-                "PM thực hiện: xem chi phí task của nhân viên");
-        checkPermissionAndSave(permissionRepository, "GET_EARNINGS_BY_PROJECT_ADMIN",
-                "Admin thực hiện: xem giao dịch earn của dự án");
-        checkPermissionAndSave(permissionRepository, "GET_EARNINGS_BY_PROJECT_FOR_PM",
-                "PM thực hiện: xem giao dịch earn của dự án");
-        checkPermissionAndSave(permissionRepository, "GET_EARNINGS_BY_PROJECT_FOR_EMPLOYEE",
-                "Employee thực hiện: xem giao dịch earn của dự án mình tham gia");
-        checkPermissionAndSave(permissionRepository, "TRANSFER_EARN_FOR_PROJECT_ADMIN",
-                "Admin thực hiện: chuyển earn giữa các nhân viên trong dự án");
-        checkPermissionAndSave(permissionRepository, "TRANSFER_EARN_FOR_PROJECT_PM",
-                "PM thực hiện: chuyển earn giữa các nhân viên trong dự án");
-        checkPermissionAndSave(permissionRepository, "REVERSE_EARN_FOR_PROJECT_ADMIN",
-                "Admin thực hiện: reverse earn trong dự án");
-        checkPermissionAndSave(permissionRepository, "REVERSE_EARN_FOR_PROJECT_PM",
-                "PM thực hiện: reverse earn trong dự án");
+    private List<Permission> permissionsSave(PermissionRepo permissionRepository) {
+        List<Permission> permissions = new ArrayList<>();
+        addUserPermissions(permissions, permissionRepository);
+        addDepartmentPermissions(permissions, permissionRepository);
+        addProjectPermissions(permissions, permissionRepository);
+        addPhasePermissions(permissions, permissionRepository);
+        addEvmPermissions(permissions, permissionRepository);
+        addProjectMemberPermissions(permissions, permissionRepository);
+        addTaskPermissions(permissions, permissionRepository);
+        addTaskNotePermissions(permissions, permissionRepository);
+        addTaskCostPermissions(permissions, permissionRepository);
+        addEarningPermissions(permissions, permissionRepository);
+        addAllocationPermissions(permissions, permissionRepository);
+        addStatisticsPermissions(permissions, permissionRepository);
+        return permissions;
     }
 
-    private void rolesSave(RoleRepo roleRepository, PermissionRepo permissionRepository) {
+    private void addUserPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_ACCOUNT",
+                "Admin thực hiện: Tạo tài khoản");
+        checkPermissionAndSave(permissions, permissionRepository, "CHANGE_PASSWORD",
+                "Người dùng thực hiện: Đổi mật khẩu");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_USERS",
+                "Admin,PM thực hiện: Lấy toàn bộ nhân viên");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_USER_BY_ID",
+                "Admin,PM thực hiện: Lấy nhân viên theo id");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_MY_INFO",
+                "Người dùng thực hiện: Lấy thông tin của mình");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_AVATAR",
+                "Người dùng thực hiện: Đổi ảnh đại diện");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_USER",
+                "Admin thực hiện: Cập nhật thông tin nhân viên");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_STATISTICS_USERS",
+                "Admin thực hiện: Lấy thổng kê nhân viên");
+
+    }
+
+    private void addDepartmentPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_DEPARTMENT",
+                "Admin thực hiện: Tạo phòng ban");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_DEPARTMENT",
+                "Admin thực hiện: Cập nhật phòng ban");
+        checkPermissionAndSave(permissions, permissionRepository, "DELETE_DEPARTMENT",
+                "Admin thực hiện: Xóa phòng ban");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_STATISTICS_DEPARTMENTS",
+                "Admin thực hiện: Lấy thống kê phòng ban");
+    }
+
+    private void addProjectPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_PROJECT",
+                "Admin thực hiện: Tạo dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_PROJECT",
+                "Admin thực hiện: Cập nhật dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "DELETE_PROJECT",
+                "Admin thực hiện: Xóa dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECTS",
+                """
+                        Admin thực hiện: lấy toàn bộ dự án trong hệ thống,
+                        PM thực hiện lấy toàn bộ dự án mình quản lý,
+                        Employee thực hiện lấy toàn bộ dự án mình tham gia
+                        """
+        );
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_BY_ID",
+                """
+                        Admin thực hiện: lấy chi tiết 1 dự án trong hệ thống,
+                        PM thực hiện lấy chi tiết 1 dự án mình quản lý,
+                        Employee thực hiện lấy chi tiết 1 dự án mình tham gia
+                        """
+        );
+    }
+
+    private void addPhasePermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_PHASE",
+                "PM thực hiện: Tạo phase cho dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_PHASE",
+                "PM thực hiện: Cập nhật phase dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "DELETE_PHASE",
+                "PM thực hiện: Xóa phase dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PHASES_BY_PROJECT",
+                "Admin,PM thực hiện: Lấy toàn bộ phase của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PHASE_BY_ID",
+                "Admin,PM thực hiện: Lấy phase theo id");
+    }
+
+    private void addEvmPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EVM_BY_PHASE",
+                "Admin,PM thực hiện: Xem chỉ số EVM theo phase");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EVM_BY_PROJECT",
+                "Admin,PM thực hiện: Xem chỉ số EVM theo dự án");
+    }
+
+    private void addProjectMemberPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_PROJECT_MEMBER",
+                "PM thực hiện: Thêm thành viên dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "DELETE_PROJECT_MEMBER",
+                "PM thực hiện: Xóa thành viên dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_MEMBERS_BY_PROJECT",
+                "Admin,PM thực hiện: Lấy thành viên dự án");
+    }
+
+    private void addTaskPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_TASK",
+                "PM thực hiện: Tạo task cho dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_TASK",
+                "PM thực hiện: Cập nhật task của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "DELETE_TASK",
+                "PM thực hiện: Xóa task của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_TASKS_BY_PROJECT",
+                "Admin,PM,Employee thực hiện: Lấy danh sách task của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_TASK_BY_ID",
+                "Admin,PM,Employee thực hiện: Xem chi tiết task");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_MY_TASK_STATUS_BY_ID",
+                "Employee thực hiện: Xác nhận đã nhận task");
+
+    }
+
+    private void addTaskNotePermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_TASK_NOTE",
+                "Employee thực hiện: Tạo task note");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_TASK_NOTE",
+                "Employee thực hiện: Sửa task note của mình");
+        checkPermissionAndSave(permissions, permissionRepository, "DELETE_TASK_NOTE",
+                "Employee thực hiện: Xóa task note của mình");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_TASK_NOTES_BY_TASK",
+                "Admin,PM,Employee thực hiện: Xem task note của task");
+        checkPermissionAndSave(permissions, permissionRepository, "CONFIRM_TASK_NOTES",
+                "PM thực hiện: Xác nhận task note");
+    }
+
+    private void addTaskCostPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "GET_TASK_COSTS_BY_PROJECT",
+                "Admin,PM,Employee thực hiện: Xem chi phí task của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_TASK_COSTS_BY_ID",
+                "Admin,PM,Employee thực hiện: Xem chi tiết chi phí task");
+    }
+
+    private void addEarningPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EARNINGS_BY_PROJECT",
+                "Admin,PM,Employee thực hiện: Xem giao dịch earn của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EARNINGS_BY_ID",
+                "Admin,PM,Employee thực hiện: Xem chi tiết giao dịch earn");
+        checkPermissionAndSave(permissions, permissionRepository, "TRANSFER_EARN",
+                "PM thực hiện: Chuyển earn giữa các nhân viên trong dự án");
+    }
+
+    private void addAllocationPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "CREATE_ALLOCATION",
+                "PM thực hiện: Tạo phân bổ nhân sự");
+        checkPermissionAndSave(permissions, permissionRepository, "UPDATE_ALLOCATION",
+                "PM thực hiện: Cập nhật phân bổ nhân sự");
+        checkPermissionAndSave(permissions, permissionRepository, "DELETE_ALLOCATION",
+                "PM thực hiện: Xóa phân bổ nhân sự");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_ALLOCATIONS_BY_PROJECT",
+                "Admin,PM,Employee xem danh sách phân bổ nhân lực trong dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_ALLOCATIONS_BY_ID",
+                "Admin,PM,Employee xem chi tiết phân bổ nhân lực trong dự án");
+    }
+
+    private void addStatisticsPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "GET_STATISTICS_SUMMARY",
+                "Admin thực hiện; PM thực hiện: Xem thống kê tổng quan");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_STATUS_STATISTICS",
+                "Admin thực hiện; PM thực hiện: Xem thống kê trạng thái dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_OVERVIEW_STATISTICS",
+                "Admin thực hiện; PM thực hiện: Xem tổng quan dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_EV_AC_STATISTICS",
+                "Admin thực hiện; PM thực hiện: Xem thống kê EV và AC theo dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_IN_PROGRESS_PROJECT_STATISTICS",
+                "Admin thực hiện; PM thực hiện: Xem thống kê dự án đang tiến hành");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EMPLOYEE_STATISTICS_SUMMARY",
+                "Employee thực hiện: Xem thống kê cá nhân");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EMPLOYEE_PROJECT_POINT_STATISTICS",
+                "Employee thực hiện: Xem point theo dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EMPLOYEE_TASK_STATISTICS",
+                "Employee thực hiện: Xem thống kê task cá nhân");
+    }
+
+    private void rolesSave(RoleRepo roleRepository, List<Permission> permissions) {
         checkRoleAndSave(roleRepository, "ADMIN", "quản trị viên",
-                permissionRepository.findByDescriptionContainingIgnoreCase("Admin thực hiện"));
+                findPermissionsByNames(permissions,
+                        "CREATE_ACCOUNT", "CHANGE_PASSWORD", "GET_USERS", "GET_USER_BY_ID",
+                        "GET_MY_INFO", "UPDATE_AVATAR", "GET_STATISTICS_USERS", "UPDATE_USER", "CREATE_DEPARTMENT",
+                        "UPDATE_DEPARTMENT", "DELETE_DEPARTMENT", "GET_STATISTICS_DEPARTMENTS", "CREATE_PROJECT",
+                        "UPDATE_PROJECT", "DELETE_PROJECT", "GET_PROJECTS", "GET_PROJECT_BY_ID",
+                        "GET_PHASES_BY_PROJECT", "GET_PHASE_BY_ID", "GET_EVM_BY_PHASE",
+                        "GET_EVM_BY_PROJECT", "GET_PROJECT_MEMBERS_BY_PROJECT",
+                        "GET_TASKS_BY_PROJECT", "GET_TASK_BY_ID",
+                        "GET_TASK_NOTES_BY_TASK", "GET_TASK_COSTS_BY_PROJECT", "GET_TASK_COSTS_BY_ID",
+                        "GET_EARNINGS_BY_PROJECT", "GET_EARNINGS_BY_ID", "GET_ALLOCATIONS_BY_PROJECT",
+                        "GET_ALLOCATIONS_BY_ID",
+                        "GET_STATISTICS_SUMMARY", "GET_PROJECT_STATUS_STATISTICS",
+                        "GET_PROJECT_OVERVIEW_STATISTICS", "GET_PROJECT_EV_AC_STATISTICS",
+                        "GET_IN_PROGRESS_PROJECT_STATISTICS"));
         checkRoleAndSave(roleRepository, "PM", "quản lý dự án",
-                permissionRepository.findByDescriptionContainingIgnoreCase("PM thực hiện"));
+                findPermissionsByNames(permissions,
+                        "CHANGE_PASSWORD", "GET_USERS", "GET_USER_BY_ID", "GET_MY_INFO", "UPDATE_AVATAR",
+                        "GET_PROJECTS", "GET_PROJECT_BY_ID",
+                        "CREATE_PHASE", "UPDATE_PHASE", "DELETE_PHASE", "GET_PHASES_BY_PROJECT",
+                        "GET_PHASE_BY_ID", "GET_EVM_BY_PHASE", "GET_EVM_BY_PROJECT",
+                        "CREATE_PROJECT_MEMBER", "DELETE_PROJECT_MEMBER", "GET_PROJECT_MEMBERS_BY_PROJECT",
+                        "CREATE_TASK", "UPDATE_TASK", "DELETE_TASK", "GET_TASKS_BY_PROJECT", "GET_TASK_BY_ID",
+                        "GET_TASK_NOTES_BY_TASK", "CONFIRM_TASK_NOTES",
+                        "GET_TASK_COSTS_BY_PROJECT", "GET_TASK_COSTS_BY_ID", "GET_EARNINGS_BY_PROJECT",
+                        "GET_EARNINGS_BY_ID", "TRANSFER_EARN", "GET_ALLOCATIONS_BY_PROJECT", "GET_ALLOCATIONS_BY_ID",
+                        "CREATE_ALLOCATION", "UPDATE_ALLOCATION", "DELETE_ALLOCATION",
+                        "GET_STATISTICS_SUMMARY", "GET_PROJECT_STATUS_STATISTICS",
+                        "GET_PROJECT_OVERVIEW_STATISTICS", "GET_PROJECT_EV_AC_STATISTICS",
+                        "GET_IN_PROGRESS_PROJECT_STATISTICS"));
         checkRoleAndSave(roleRepository, "EMPLOYEE", "nhân viên",
-                permissionRepository.findByDescriptionContainingIgnoreCase("Employee thực hiện"));
+                findPermissionsByNames(permissions,
+                        "CHANGE_PASSWORD", "GET_MY_INFO", "UPDATE_AVATAR",
+                        "GET_TASKS_BY_PROJECT", "GET_ALLOCATIONS_BY_PROJECT", "GET_ALLOCATIONS_BY_ID",
+                        "UPDATE_MY_TASK_STATUS_BY_ID", "CREATE_TASK_NOTE",
+                        "UPDATE_TASK_NOTE", "DELETE_TASK_NOTE", "GET_TASK_NOTES_BY_TASK",
+                        "GET_TASK_COSTS_BY_PROJECT", "GET_TASK_COSTS_BY_ID", "GET_EARNINGS_BY_PROJECT",
+                        "GET_EARNINGS_BY_ID", "GET_EMPLOYEE_STATISTICS_SUMMARY",
+                        "GET_EMPLOYEE_PROJECT_POINT_STATISTICS", "GET_EMPLOYEE_TASK_STATISTICS",
+                        "GET_PROJECTS", "GET_PROJECT_BY_ID", "GET_TASK_BY_ID"));
+    }
+
+    private List<Permission> findPermissionsByNames(List<Permission> permissions, String... names) {
+        List<String> requestedNames = List.of(names);
+        List<Permission> matchingPermissions = permissions.stream()
+                .filter(permission -> requestedNames.contains(permission.getName())).toList();
+        if (matchingPermissions.size() != requestedNames.size()) {
+            throw new AppException(AppError.PERMISSIONS_NOT_MATCH);
+        }
+        return matchingPermissions;
     }
 
     private void departmentSave(DepartmentRepo departmentRepository) {
-        checkDepartmentAndSave(departmentRepository, "Admin");
-        checkDepartmentAndSave(departmentRepository, "Test");
+        checkDepartmentAndSave(departmentRepository, "ADMIN");
         checkDepartmentAndSave(departmentRepository, "DEV");
         checkDepartmentAndSave(departmentRepository, "BA");
         checkDepartmentAndSave(departmentRepository, "QC");
     }
 
     private void userSave(UserRepo userRepository, AuthRepo authRepository, DepartmentRepo departmentRepository,
-                          RoleRepo roleRepository, PasswordEncoder passwordEncoder) {
+                          RoleRepo roleRepository, PasswordEncoder passwordEncoder, String demoPassword) {
         checkUserAndSave(userRepository, authRepository, departmentRepository, roleRepository, passwordEncoder,
-                "admin@gmail.com", "Password@12345", List.of("ADMIN", "PM", "EMPLOYEE"), "Admin", "Admin",
+                "admin@gmail.com", demoPassword, List.of("ADMIN", "PM", "EMPLOYEE"), "Admin", "Admin",
                 BigDecimal.valueOf(2), "admin");
         checkUserAndSave(userRepository, authRepository, departmentRepository, roleRepository, passwordEncoder,
-                "pm1@gmail.com", "Password@12345", List.of("PM", "EMPLOYEE"), "PM", "PM1", BigDecimal.valueOf(1.5), "DEV");
+                "pm1@gmail.com", demoPassword, List.of("PM", "EMPLOYEE"), "PM", "PM1", BigDecimal.valueOf(1.5), "DEV");
         checkUserAndSave(userRepository, authRepository, departmentRepository, roleRepository, passwordEncoder,
-                "employee1@gmail.com", "Password@12345", List.of("EMPLOYEE"), "Employee1", "junior",
+                "employee1@gmail.com", demoPassword, List.of("EMPLOYEE"), "Employee1", "junior",
                 BigDecimal.valueOf(1), "DEV");
         checkUserAndSave(userRepository, authRepository, departmentRepository, roleRepository, passwordEncoder,
-                "employee2@gmail.com", "Password@12345", List.of("EMPLOYEE"), "Employee2", "intern",
+                "employee2@gmail.com", demoPassword, List.of("EMPLOYEE"), "Employee2", "intern",
                 BigDecimal.valueOf(0.5), "DEV");
     }
 
-    private void checkUserAndSave(UserRepo userRepository, AuthRepo authRepository, DepartmentRepo departmentRepository,
-                                  RoleRepo roleRepository, PasswordEncoder passwordEncoder,
-                                  String email, String password, List<String> roles,
-                                  String userName, String position, BigDecimal resourceRate, String departmentName) {
+    private void checkUserAndSave(
+            UserRepo userRepository, AuthRepo authRepository, DepartmentRepo departmentRepository,
+            RoleRepo roleRepository, PasswordEncoder passwordEncoder,
+            String email, String password, List<String> roles,
+            String userName, String position, BigDecimal resourceRate, String departmentName) {
 
         if (authRepository.existsByEmail(email)) {
             return;
@@ -167,22 +311,30 @@ public class AppConfig {
         Auth authentication = Auth.builder()
                 .email(createAccountRequest.getEmail())
                 .password(passwordEncoder.encode(createAccountRequest.getPassword()))
-                .user(newUser).enabled(true).build();
+                .user(newUser).build();
 
         authRepository.save(authentication);
 
     }
 
-    private void checkPermissionAndSave(PermissionRepo permissionRepository, String permission,
-                                        String description) {
-
-        if (permissionRepository.findByName(permission).isEmpty()) {
-            permissionRepository.save(Permission.builder().name(permission).description(description).build());
+    private void checkPermissionAndSave(
+            List<Permission> permissions,
+            PermissionRepo permissionRepository,
+            String permission,
+            String description) {
+        Permission entity = permissionRepository.findByName(permission)
+                .orElseGet(() -> Permission.builder().name(permission).build());
+        if (!description.equals(entity.getDescription())) {
+            entity.setDescription(description);
+            entity = permissionRepository.save(entity);
         }
+        permissions.add(entity);
     }
 
-    private void checkRoleAndSave(RoleRepo roleRepository, String role, String description,
-                                  List<Permission> permissions) {
+    private void checkRoleAndSave(
+            RoleRepo roleRepository,
+            String role, String description,
+            List<Permission> permissions) {
 
         if (roleRepository.findByName(role).isEmpty()) {
             roleRepository.save(Role.builder().name(role).description(description).permissions(permissions).build());
@@ -190,7 +342,13 @@ public class AppConfig {
             Role entity = roleRepository.findByName(role)
                     .orElseThrow(() -> AppException.builder().appError(AppError.ROLE_NOT_FOUND).build());
 
-            boolean same = new HashSet<>(permissions).equals(new HashSet<>(entity.getPermissions()));
+            Set<String> desiredPermissionNames = permissions.stream()
+                    .map(Permission::getName)
+                    .collect(Collectors.toSet());
+            Set<String> existingPermissionNames = entity.getPermissions().stream()
+                    .map(Permission::getName)
+                    .collect(Collectors.toSet());
+            boolean same = desiredPermissionNames.equals(existingPermissionNames);
             if (!same) {
                 entity.setPermissions(permissions);
                 roleRepository.save(entity);
