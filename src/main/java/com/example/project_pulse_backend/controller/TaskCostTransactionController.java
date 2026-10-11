@@ -22,7 +22,7 @@ public class TaskCostTransactionController {
                 .build();
     }
 
-    @GetMapping("/project/{id}")
+    @GetMapping("/{id}")
     public APIResponse<TaskCostTransactionResponse> getById(@PathVariable Long id) {
         return APIResponse.<TaskCostTransactionResponse>builder()
                 .result(taskCostTransactionService.getById(id))

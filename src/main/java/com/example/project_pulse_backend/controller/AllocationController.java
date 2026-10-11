@@ -37,7 +37,7 @@ public class AllocationController {
         return APIResponse.<Void>builder().build();
     }
 
-    @GetMapping("/{projectId}")
+    @GetMapping("/project/{projectId}")
     public APIResponse<AllocationResponse> getAllocationsByProjectId(
             @PathVariable Long projectId,
             @RequestParam(required = false) Long phaseId,
