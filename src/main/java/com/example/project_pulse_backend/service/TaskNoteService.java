@@ -99,7 +99,6 @@ public class TaskNoteService {
     }
 
     @PreAuthorize("hasAuthority('GET_TASK_NOTES_BY_TASK')")
-    @Transactional(readOnly = true)
     public List<TaskNoteResponse> getTaskNotesByTask(Long taskId) {
         User user = getUserByToken.get();
         return taskNoteHelper.getByTask(taskId, user).stream().map(this::toResponse).toList();
@@ -120,7 +119,7 @@ public class TaskNoteService {
 
         return toResponse(taskNoteRepo.save(taskNote));
     }
-    
+
     private TaskNoteResponse toResponse(TaskNote taskNote) {
         ProjectMember author = taskNote.getAuthor();
         return TaskNoteResponse.builder()
