@@ -47,8 +47,8 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public APIResponse<Void> forgotPassword(@RequestParam @Valid String email) {
-        authenticationService.forgotPassword(email);
+    public APIResponse<Void> forgotPassword(@RequestBody @Valid EmailForgotPasswordRequest email) {
+        authenticationService.forgotPassword(email.getEmail());
         return APIResponse.<Void>builder().build();
     }
 

@@ -13,8 +13,6 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
@@ -55,9 +53,8 @@ public class EmailHelper {
     }
 
 
-    public String bodyChangePassword(String email, String forgotPassWordCode) {
-        String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
-        String url = frontendDomain + "/change-password/" + encodedEmail + "/" + forgotPassWordCode;
+    public String bodyChangePassword(String forgotPassWordCode) {
+        String url = frontendDomain + "/change-password/" + forgotPassWordCode;
 
         return """
                 <html><body>

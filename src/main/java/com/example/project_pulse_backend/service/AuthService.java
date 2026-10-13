@@ -116,19 +116,17 @@ public class AuthService {
     public void forgotPassword(String email) {
         Auth authentication = authHelper.getAuthenticationByEmail(email);
         String forgotPassWordCode = authHelper.generateActivationCode();
-
-        authentication.setForgotPasswordCode(forgotPassWordCode);
-        authentication.setForgotPasswordCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        authenticationRepo.save(authentication);
-
         emailHelper.sendEmail(
                 SendEmailRequest.builder()
                         .to(Recipient.builder()
                                 .email(authentication.getEmail())
                                 .build())
                         .subject("Đổi mật khẩu tài khoản của bạn")
-                        .htmlContent(emailHelper.bodyChangePassword(authentication.getEmail(), forgotPassWordCode))
+                        .htmlContent(emailHelper.bodyChangePassword(forgotPassWordCode))
                         .build());
+        authentication.setForgotPasswordCode(forgotPassWordCode);
+        authentication.setForgotPasswordCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        authenticationRepo.save(authentication);
     }
 
     @Transactional
