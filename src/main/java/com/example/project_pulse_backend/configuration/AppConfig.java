@@ -251,6 +251,7 @@ public class AppConfig {
         checkRoleAndSave(roleRepository, "EMPLOYEE", "nhân viên",
                 findPermissionsByNames(permissions,
                         "CHANGE_PASSWORD", "GET_MY_INFO", "UPDATE_AVATAR",
+                        "GET_PHASES_BY_PROJECT",
                         "GET_TASKS_BY_PROJECT", "GET_ALLOCATIONS_BY_PROJECT", "GET_ALLOCATIONS_BY_ID",
                         "UPDATE_MY_TASK_STATUS_BY_ID", "CREATE_TASK_NOTE",
                         "UPDATE_TASK_NOTE", "DELETE_TASK_NOTE", "GET_TASK_NOTES_BY_TASK",

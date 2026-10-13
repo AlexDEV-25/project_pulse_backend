@@ -32,9 +32,10 @@ public class TaskController {
     public APIResponse<TaskResponse> getTasksByProject(
             @PathVariable Long projectId,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Long phaseId) {
+            @RequestParam(required = false) Long phaseId,
+            @RequestParam(required = false) Long userId) {
         return APIResponse.<TaskResponse>builder()
-                .resultList(taskService.getTasksByProject(projectId, keyword, phaseId)).build();
+                .resultList(taskService.getTasksByProject(projectId, keyword, phaseId, userId)).build();
     }
 
     @GetMapping("/pm/detail/{id}")

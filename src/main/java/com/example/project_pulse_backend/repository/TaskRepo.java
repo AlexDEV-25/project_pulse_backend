@@ -21,11 +21,21 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
                     :keyword IS NULL
                     OR LOWER(task.taskName) LIKE LOWER(CONCAT('%', :keyword, '%'))
               )
+              AND (
+                    :userId IS NULL
+                    OR EXISTS (
+                        SELECT assignment.id
+                        FROM TaskAssignment assignment
+                        WHERE assignment.task = task
+                          AND assignment.employee.user.id = :userId
+                    )
+              )
             """)
     List<Task> findByProjectIdAndFilters(
             @Param("projectId") Long projectId,
             @Param("phaseId") Long phaseId,
-            @Param("keyword") String keyword);
+            @Param("keyword") String keyword,
+            @Param("userId") Long userId);
 
     @Query("""
             SELECT task

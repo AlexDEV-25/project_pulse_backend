@@ -27,9 +27,9 @@ public class TaskHelper {
         }
     }
 
-    public List<Task> getProjectById(Long projectId, User user, Long phaseId, String keyword) {
+    public List<Task> getProjectById(Long projectId, User user, Long phaseId, String keyword, Long userId) {
         Project project = projectHelper.getProjectById(projectId, user);
-        return taskRepo.findByProjectIdAndFilters(project.getId(), phaseId, keyword);
+        return taskRepo.findByProjectIdAndFilters(project.getId(), phaseId, keyword, userId);
     }
 
     public Task getById(Long Id, User user) {

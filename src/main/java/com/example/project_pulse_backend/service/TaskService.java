@@ -111,13 +111,19 @@ public class TaskService {
 
     @PreAuthorize("hasAuthority('GET_TASKS_BY_PROJECT')")
     @Transactional(readOnly = true)
-    public List<TaskResponse> getTasksByProject(Long projectId, String keyword, Long phaseId) {
+    public List<TaskResponse> getTasksByProject(Long projectId, String keyword, Long phaseId, Long userId) {
         User user = getUserByToken.get();
 
         String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
-        return taskHelper.getProjectById(projectId, user, phaseId, normalizedKeyword).stream()
+        return taskHelper.getProjectById(projectId, user, phaseId, normalizedKeyword, userId).stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @PreAuthorize("hasAuthority('GET_TASKS_BY_PROJECT')")
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getTasksByProject(Long projectId, String keyword, Long phaseId) {
+        return getTasksByProject(projectId, keyword, phaseId, null);
     }
     
     @PreAuthorize("hasAuthority('GET_TASK_BY_ID')")
