@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "allocations")
@@ -28,6 +31,15 @@ public class Allocation {
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private ProjectMember member;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "allocation_overloaded_dates",
+            joinColumns = @JoinColumn(name = "allocation_id")
+    )
+    @Column(name = "overloaded_date", nullable = false)
+    @Builder.Default
+    private List<LocalDate> overloadedDates = new ArrayList<>();
 
     // resourceRateSnapshot =  User.resourceRate tại thời điểm phân bổ (bất biến trong suốt phase)
     @Column(name = "resource_rate_snapshot")

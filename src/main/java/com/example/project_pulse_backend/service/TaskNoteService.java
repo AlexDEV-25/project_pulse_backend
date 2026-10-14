@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class TaskNoteService {
                 .content(request.getContent())
                 .workingHours(request.getWorkingHours())
                 .workingDate(request.getWorkingDate())
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDate.now())
                 .taskNoteStatus(TaskNoteStatus.PENDING_CONFIRMATION)
                 .build();
         return toResponse(taskNoteRepo.save(taskNote));
@@ -81,7 +82,7 @@ public class TaskNoteService {
         taskNote.setContent(request.getContent());
         taskNote.setWorkingHours(request.getWorkingHours());
         taskNote.setWorkingDate(request.getWorkingDate());
-        taskNote.setUpdatedAt(LocalDateTime.now());
+        taskNote.setUpdatedAt(LocalDate.now());
         return toResponse(taskNoteRepo.save(taskNote));
     }
 

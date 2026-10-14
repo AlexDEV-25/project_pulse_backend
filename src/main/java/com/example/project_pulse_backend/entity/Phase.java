@@ -3,9 +3,9 @@ package com.example.project_pulse_backend.entity;
 import com.example.project_pulse_backend.constant.PhaseStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -26,15 +26,16 @@ public class Phase {
     private Project project;
 
     @Column(name = "start_at")
-    private LocalDateTime startAt;
+    private LocalDate startAt;
 
     @Column(name = "end_at")
-    private LocalDateTime endAt;
+    private LocalDate endAt;
 
     @Column(name = "phase_name", nullable = false, unique = true)
     private String phaseName;
 
     @ElementCollection
+    @BatchSize(size = 100)
     @CollectionTable(
             name = "phase_make_up_date",
             joinColumns = @JoinColumn(name = "phase_id")
@@ -43,6 +44,7 @@ public class Phase {
     private List<LocalDate> makeUpDates;
 
     @ElementCollection
+    @BatchSize(size = 100)
     @CollectionTable(
             name = "phase_off_date",
             joinColumns = @JoinColumn(name = "phase_id")

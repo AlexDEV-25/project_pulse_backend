@@ -8,15 +8,24 @@ import com.example.project_pulse_backend.dto.response.PhaseResponse;
 import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.exception.AppException;
-import com.example.project_pulse_backend.helper.*;
+import com.example.project_pulse_backend.helper.AllocationHelper;
+import com.example.project_pulse_backend.helper.EvmHelper;
+import com.example.project_pulse_backend.helper.GetUserByToken;
+import com.example.project_pulse_backend.helper.PhaseHelper;
+import com.example.project_pulse_backend.helper.ProjectHelper;
+import com.example.project_pulse_backend.helper.ProjectMemberHelper;
+import com.example.project_pulse_backend.helper.TimeHelper;
+import com.example.project_pulse_backend.repository.AllocationRepo;
 import com.example.project_pulse_backend.repository.PhaseRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +33,13 @@ import java.util.List;
 public class PhaseService {
     private final PhaseRepo phaseRepo;
 
-    private final TaskHelper taskHelper;
-    private final AllocationHelper allocationHelper;
     private final GetUserByToken getUserByToken;
     private final PhaseHelper phaseHelper;
+    private final AllocationHelper allocationHelper;
     private final ProjectHelper projectHelper;
     private final EvmHelper evmHelper;
+    private final AllocationRepo allocationRepo;
+    private final ProjectMemberHelper projectMemberHelper;
 
     @PreAuthorize("hasAuthority('CREATE_PHASE')")
     @Transactional
@@ -56,7 +66,7 @@ public class PhaseService {
     }
 
     @PreAuthorize("hasAuthority('UPDATE_PHASE')")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public PhaseResponse updatePhase(Long id, UpdatePhaseRequest request) {
         var user = getUserByToken.get();
         Phase entity = phaseRepo.findByIdForUpdate(id).orElseThrow(
@@ -72,6 +82,14 @@ public class PhaseService {
         List<LocalDate> offDates = phaseHelper.normalizeDates(request.getOffDates());
         phaseHelper.checkSpecialDates(request.getStartAt(), request.getEndAt(), makeUpDates, offDates);
 
+        List<Long> affectedUserIds = allocationRepo.findByPhase_Id(id).stream()
+                .map(allocation -> allocation.getMember().getUser().getId())
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .toList();
+        affectedUserIds.forEach(projectMemberHelper::lockAllProjectMembersByUserId);
+
         entity.setStartAt(request.getStartAt());
         entity.setEndAt(request.getEndAt());
         entity.setPhaseName(request.getPhaseName());
@@ -83,7 +101,9 @@ public class PhaseService {
         }
         entity.setStatus(request.getPhaseStatus());
 
-        return toResponse(phaseRepo.save(entity));
+        Phase saved = phaseRepo.save(entity);
+        affectedUserIds.forEach(allocationHelper::recalculateForUser);
+        return toResponse(saved);
     }
 
     @PreAuthorize("hasAuthority('DELETE_PHASE')")
@@ -94,8 +114,8 @@ public class PhaseService {
         projectHelper.checkProjectNotDone(phase.getProject());
         phaseHelper.checkPhaseNotDone(phase);
 
-        taskHelper.checkHasTask(id);
-        allocationHelper.checkHasAllocation(id);
+        phaseHelper.checkHasTask(id);
+        phaseHelper.checkHasAllocation(id);
 
         phaseRepo.delete(phase);
     }
@@ -112,7 +132,7 @@ public class PhaseService {
         Phase phase = phaseHelper.getPhaseById(phaseId, getUserByToken.get());
         return toResponse(phase);
     }
-    
+
     private PhaseResponse toResponse(Phase phase) {
         return PhaseResponse.builder()
                 .id(phase.getId())

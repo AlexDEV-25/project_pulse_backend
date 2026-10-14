@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,10 +19,10 @@ import java.util.List;
 public class UpdatePhaseRequest {
 
     @NotNull(message = "Start date cannot be null")
-    private LocalDateTime startAt;
+    private LocalDate startAt;
 
     @NotNull(message = "End date cannot be null")
-    private LocalDateTime endAt;
+    private LocalDate endAt;
 
     @NotBlank(message = "Ten phase khong duoc de trong")
     @Size(min = 2, max = 100, message = "Ten phase phai tu 2 den 100 ky tu")

@@ -11,7 +11,7 @@ import com.example.project_pulse_backend.repository.TaskRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -20,12 +20,6 @@ public class TaskHelper {
     private final TaskRepo taskRepo;
     private final ProjectHelper projectHelper;
     private final PhaseHelper phaseHelper;
-
-    public void checkHasTask(Long phaseId) {
-        if (!taskRepo.findByPhase_Id(phaseId).isEmpty()) {
-            throw AppException.builder().appError(AppError.PHASE_IN_USE).build();
-        }
-    }
 
     public List<Task> getProjectById(Long projectId, User user, Long phaseId, String keyword, Long userId) {
         Project project = projectHelper.getProjectById(projectId, user);
@@ -50,7 +44,7 @@ public class TaskHelper {
         }
     }
 
-    public void checkTime(Phase phase, LocalDateTime startAt, LocalDateTime endAt) {
+    public void checkTime(Phase phase, LocalDate startAt, LocalDate endAt) {
         TimeHelper.checkStartBeforeEnd(startAt, endAt);
         TimeHelper.checkTaskInPhase(startAt, endAt, phase.getStartAt(), phase.getEndAt());
     }

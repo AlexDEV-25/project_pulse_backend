@@ -12,8 +12,11 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -22,13 +25,14 @@ public class AllocationHelper {
     private final ProjectHelper projectHelper;
     private final PhaseHelper phaseHelper;
 
-
+    // lấy phân bổ theo project
     public List<Allocation> getAllocationByProject(Long projectId, Long phaseId, User user, String keyword) {
         Project project = projectHelper.getProjectById(projectId, user);
         return allocationRepo.findByProjectId(project.getId(), phaseId, keyword,
                 RoleHelper.checkIsEmployee(user) ? user.getId() : null);
     }
 
+    // lấy phân bổ theo id
     public Allocation getAllocationById(Long id, User user) {
         Allocation allocation = allocationRepo.findById(id).orElseThrow(
                 () -> AppException.builder().appError(AppError.ALLOCATION_NOT_FOUND).build());
@@ -37,12 +41,7 @@ public class AllocationHelper {
         return allocation;
     }
 
-    public void checkHasAllocation(Long phaseId) {
-        if (!allocationRepo.findByPhase_Id(phaseId).isEmpty()) {
-            throw AppException.builder().appError(AppError.PHASE_IN_USE).build();
-        }
-    }
-
+    // tính point phân bổ (point = % phân bổ x ngày làm việc(trong phase) x costSnapshot)
     public BigDecimal calculateAllocationPoint(Allocation allocation) {
         if (allocation == null) {
             return BigDecimal.ZERO;
@@ -69,18 +68,29 @@ public class AllocationHelper {
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
     }
 
-    public void validateTotalAllocationPercentage(Long userId, LocalDateTime startAt, LocalDateTime endAt,
-                                                  Integer newPercentage, Long currentAllocationId) {
-        List<Allocation> overlappingAllocations = allocationRepo.findOverlappingAllocationsByUserId(userId,
-                startAt, endAt);
+    public void recalculateForUser(Long userId) {
+        List<Allocation> allocations = allocationRepo.findAllByMember_User_Id(userId);
+        Map<Allocation, Set<LocalDate>> workingDatesByAllocation = new HashMap<>();
+        Map<LocalDate, Integer> dailyTotals = new HashMap<>();
 
-        int currentTotal = overlappingAllocations.stream()
-                .filter(a -> !a.getId().equals(currentAllocationId))
-                .mapToInt(Allocation::getAllocationPercentage)
-                .sum();
+        for (Allocation allocation : allocations) {
+            Phase phase = allocation.getPhase();
+            Set<LocalDate> workingDates = TimeHelper.workingDates(
+                    phase.getStartAt(),
+                    phase.getEndAt(),
+                    phase.getMakeUpDates(),
+                    phase.getOffDates());
+            workingDatesByAllocation.put(allocation, workingDates);
+            for (LocalDate date : workingDates) {
+                dailyTotals.merge(date, allocation.getAllocationPercentage(), Integer::sum);
+            }
+        }
 
-        if (currentTotal + newPercentage > 100) {
-            throw AppException.builder().appError(AppError.TOTAL_ALLOCATION_EXCEEDS_100).build();
+        for (Allocation allocation : allocations) {
+            List<LocalDate> overloadedDates = workingDatesByAllocation.get(allocation).stream()
+                    .filter(date -> dailyTotals.getOrDefault(date, 0) > 100)
+                    .toList();
+            allocation.setOverloadedDates(overloadedDates);
         }
     }
 

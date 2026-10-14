@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class UpdateTaskNoteRequest {
 
     @NotNull(message = "Ngày làm việc không được để trống")
-    private LocalDateTime workingDate;
+    private LocalDate workingDate;
 
     @NotBlank(message = "Nội dung task note không được để trống")
     private String content;

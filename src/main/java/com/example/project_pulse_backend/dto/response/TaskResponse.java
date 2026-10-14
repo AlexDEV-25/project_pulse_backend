@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -22,8 +22,8 @@ public class TaskResponse {
     private String phaseName;
     private String taskName;
     private String description;
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    private LocalDate startAt;
+    private LocalDate endAt;
     private TaskStatus taskStatus;
     private BigDecimal taskPoint;
     private Integer progress;

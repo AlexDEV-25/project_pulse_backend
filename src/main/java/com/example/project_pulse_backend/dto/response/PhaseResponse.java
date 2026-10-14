@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -19,8 +18,8 @@ public class PhaseResponse {
     private Long id;
     private Long projectId;
     private String projectName;
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    private LocalDate startAt;
+    private LocalDate endAt;
     private String phaseName;
     private List<LocalDate> makeUpDates;
     private List<LocalDate> offDates;

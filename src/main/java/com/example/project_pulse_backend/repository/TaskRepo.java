@@ -37,23 +37,6 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
             @Param("keyword") String keyword,
             @Param("userId") Long userId);
 
-    @Query("""
-            SELECT task
-            FROM Task task
-            WHERE task.phase.project.id = :projectId
-              AND task.phase.project.pm.id = :pmId
-              AND (:phaseId IS NULL OR task.phase.id = :phaseId)
-              AND (
-                    :keyword IS NULL
-                    OR LOWER(task.taskName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-              )
-            """)
-    List<Task> findByProjectIdAndPmIdAndFilters(
-            @Param("projectId") Long projectId,
-            @Param("pmId") Long pmId,
-            @Param("phaseId") Long phaseId,
-            @Param("keyword") String keyword);
-
     @Query("SELECT COALESCE(SUM(task.taskPoint), 0) FROM Task task WHERE task.phase.id = :phaseId")
     BigDecimal sumTaskPointsByPhaseId(@Param("phaseId") Long phaseId);
 

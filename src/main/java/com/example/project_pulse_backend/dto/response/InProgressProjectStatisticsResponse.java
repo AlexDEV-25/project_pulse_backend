@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -20,7 +20,7 @@ public class InProgressProjectStatisticsResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String pmName;
 
-    private LocalDateTime endAt;
+    private LocalDate endAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private BigDecimal clientBudget;

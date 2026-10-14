@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,8 +41,8 @@ public class StatisticsService {
         User user = getUserByToken.get();
 
         List<Project> projects = projectHelper.getProjectForAdminAndPm(user);
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime nearingDeadline = now.plusDays(NEARING_DEADLINE_DAYS);
+        LocalDate now = LocalDate.now();
+        LocalDate nearingDeadline = now.plusDays(NEARING_DEADLINE_DAYS);
 
         long overdue = projects.stream()
                 .filter(StatisticsHelper::isNotFinished)
@@ -140,7 +140,7 @@ public class StatisticsService {
         List<Project> projects = projectHelper.getProjectForAdminAndPm(user).stream()
                 .filter(project -> project.getProjectStatus() == ProjectStatus.IN_PROGRESS).toList();
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
 
         return projects.stream()
                 .map(project -> toInProgressResponse(project, role, now)).toList();
@@ -184,8 +184,8 @@ public class StatisticsService {
     @PreAuthorize("hasAuthority('GET_EMPLOYEE_TASK_STATISTICS')")
     public List<EmployeeTaskStatisticsResponse> getEmployeeTasks() {
         User user = getUserByToken.get();
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime nearingDeadline = now.plusDays(NEARING_DEADLINE_DAYS);
+        LocalDate now = LocalDate.now();
+        LocalDate nearingDeadline = now.plusDays(NEARING_DEADLINE_DAYS);
 
         return taskRepo.findAssignedTasksWithDetails(user.getId()).stream()
                 .filter(task -> StatisticsHelper.isInProgressOrNearingDeadline(task, now, nearingDeadline))
@@ -203,7 +203,7 @@ public class StatisticsService {
     }
 
     private InProgressProjectStatisticsResponse toInProgressResponse(
-            Project project, String role, LocalDateTime now) {
+            Project project, String role, LocalDate now) {
         BigDecimal ev = earningTransactionRepo.sumNetEarnedPointsByProjectId(
                 project.getId(), EarningTransactionType.EARN);
         BigDecimal ac = taskCostTransactionRepo.sumCostPointsByProjectId(project.getId());

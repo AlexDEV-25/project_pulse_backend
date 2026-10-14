@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class EmployeeTaskStatisticsResponse {
     private String projectName;
     private String taskName;
-    private LocalDateTime endAt;
+    private LocalDate endAt;
     private BigDecimal taskPoint;
     private int progress;
 }

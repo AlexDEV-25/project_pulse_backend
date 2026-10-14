@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -18,8 +18,8 @@ public class ProjectResponse {
     private String projectName;
     private Long pmId;
     private String pmName;
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    private LocalDate startAt;
+    private LocalDate endAt;
     private BigDecimal clientBudget;
     private BigDecimal projectBudget;
     private String description;

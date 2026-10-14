@@ -39,7 +39,7 @@ public class EvmHelper {
 
         LocalDateTime capturedAt = LocalDateTime.now();
         BigDecimal bac = bacForPhase(phase);
-        BigDecimal pv = pvForPhase(phase, capturedAt);
+        BigDecimal pv = pvForPhase(phase, capturedAt.toLocalDate());
         BigDecimal ev = evForPhase(phase.getId());
         BigDecimal ac = acForPhase(phase.getId());
 
@@ -83,11 +83,11 @@ public class EvmHelper {
 
     public BigDecimal plannedValueAt(
             BigDecimal allocationPoint,
-            LocalDateTime phaseStartAt,
-            LocalDateTime phaseEndAt,
+            LocalDate phaseStartAt,
+            LocalDate phaseEndAt,
             List<LocalDate> makeUpDates,
             List<LocalDate> offDates,
-            LocalDateTime at) {
+            LocalDate at) {
         Objects.requireNonNull(allocationPoint, "allocationPoint must not be null");
         Objects.requireNonNull(phaseStartAt, "phaseStartAt must not be null");
         Objects.requireNonNull(phaseEndAt, "phaseEndAt must not be null");
@@ -123,13 +123,13 @@ public class EvmHelper {
                 phase,
                 capturedAt,
                 bacForPhase(phase),
-                pvForPhase(phase, capturedAt),
+                pvForPhase(phase, capturedAt.toLocalDate()),
                 evForPhase(phase.getId()),
                 acForPhase(phase.getId())
         );
     }
 
-    public BigDecimal pv(Long projectId, LocalDateTime at) {
+    public BigDecimal pv(Long projectId, LocalDate at) {
         BigDecimal total = BigDecimal.ZERO;
         for (var allocation : allocationRepo.findByProjectId(projectId, null, null, null)) {
             Phase phase = allocation.getPhase();
@@ -150,7 +150,7 @@ public class EvmHelper {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private BigDecimal pvForPhase(Phase phase, LocalDateTime at) {
+    private BigDecimal pvForPhase(Phase phase, LocalDate at) {
         return allocationRepo.findByPhase_Id(phase.getId()).stream()
                 .map(allocation -> plannedValueAt(
                         allocationHelper.calculateAllocationPoint(allocation),

@@ -17,6 +17,7 @@ import com.example.project_pulse_backend.repository.AllocationRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -32,11 +33,11 @@ public class AllocationService {
     private final AllocationHelper allocationHelper;
 
     @PreAuthorize("hasAuthority('CREATE_ALLOCATION')")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AllocationResponse createAllocation(CreateAllocationRequest request) {
         User user = getUserByToken.get();
 
-        Phase phase = phaseHelper.getPhaseById(request.getPhaseId(), user);
+        Phase phase = phaseHelper.getPhaseByIdForUpdate(request.getPhaseId(), user);
         allocationHelper.checkDone(phase);
 
         ProjectMember member = projectMemberHelper.getProjectMemberById(request.getMemberId(), user);
@@ -50,10 +51,6 @@ public class AllocationService {
             throw AppException.builder().appError(AppError.ALLOCATION_ALREADY_EXISTS).build();
         }
 
-        // Tổng phân bổ trong cùng 1 khoảng thời gian không vượt quá 100%
-        allocationHelper.validateTotalAllocationPercentage(userId, phase.getStartAt(), phase.getEndAt(),
-                request.getAllocationPercentage(), null);
-
         // Preserve the user's rate at the time the allocation is created.
         BigDecimal resourceRate = member.getUser().getResourceRate() != null
                 ? member.getUser().getResourceRate()
@@ -66,11 +63,13 @@ public class AllocationService {
                 .resourceRateSnapshot(resourceRate)
                 .build();
 
-        return toResponse(allocationRepo.save(allocation));
+        Allocation saved = allocationRepo.save(allocation);
+        allocationHelper.recalculateForUser(userId);
+        return toResponse(saved);
     }
 
     @PreAuthorize("hasAuthority('UPDATE_ALLOCATION')")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AllocationResponse updateAllocation(Long id, UpdateAllocationRequest request) {
         User user = getUserByToken.get();
 
@@ -83,30 +82,25 @@ public class AllocationService {
         // KHÓA NGAY: Lock toàn bộ ProjectMember của nhân sự này để tránh race condition giữa 2 PM
         projectMemberHelper.lockAllProjectMembersByUserId(userId);
 
-        //  Kiểm tra tổng tải phân bổ sau khi đã có lock (đảm bảo đọc được trạng thái mới nhất)
-        allocationHelper.validateTotalAllocationPercentage(
-                userId,
-                phase.getStartAt(),
-                phase.getEndAt(),
-                request.getAllocationPercentage(),
-                allocation.getId() // Loại trừ chính bản ghi này ra khỏi tổng cũ
-        );
-
         // 4. Cập nhật tỷ lệ phân bổ mới
         allocation.setAllocationPercentage(request.getAllocationPercentage());
 
-        return toResponse(allocationRepo.save(allocation));
+        Allocation saved = allocationRepo.save(allocation);
+        allocationHelper.recalculateForUser(userId);
+        return toResponse(saved);
     }
 
     @PreAuthorize("hasAuthority('DELETE_ALLOCATION')")
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteAllocation(Long id) {
         User user = getUserByToken.get();
 
         Allocation allocation = allocationHelper.getAllocationById(id, user);
         allocationHelper.checkDone(allocation.getPhase());
-        // kiểm tra lại sau
+        Long userId = allocation.getMember().getUser().getId();
+        projectMemberHelper.lockAllProjectMembersByUserId(userId);
         allocationRepo.delete(allocation);
+        allocationHelper.recalculateForUser(userId);
     }
 
     @PreAuthorize("hasAuthority('GET_ALLOCATIONS_BY_PROJECT')")
@@ -140,6 +134,9 @@ public class AllocationService {
                 .allocationPercentage(allocation.getAllocationPercentage())
                 .resourceRateSnapshot(allocation.getResourceRateSnapshot())
                 .allocationPoint(allocationHelper.calculateAllocationPoint(allocation))
+                .overloadedDates(allocation.getOverloadedDates() == null
+                        ? List.of()
+                        : List.copyOf(allocation.getOverloadedDates()))
                 .build();
     }
 

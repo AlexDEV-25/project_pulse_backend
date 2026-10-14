@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -24,8 +24,8 @@ public class UpdateProjectRequest {
     @NotNull(message = "PM_ID không được để trống")
     private Long pmId;
 
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    private LocalDate startAt;
+    private LocalDate endAt;
     private BigDecimal clientBudget;
     private BigDecimal projectBudget;
     private String description;

@@ -4,6 +4,7 @@ import com.example.project_pulse_backend.constant.TaskNoteStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,13 +38,13 @@ public class TaskNote {
     private Integer workingHours;
 
     @Column(name = "working_date", nullable = false)
-    private LocalDateTime workingDate;
+    private LocalDate workingDate;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
 
     @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;

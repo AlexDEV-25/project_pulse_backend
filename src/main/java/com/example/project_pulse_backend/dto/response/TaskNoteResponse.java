@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -20,8 +20,8 @@ public class TaskNoteResponse {
     private String employeeAvatarUrl;
     private String content;
     private Integer workingHours;
-    private LocalDateTime workingDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDate workingDate;
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
     private TaskNoteStatus taskNoteStatus;
 }

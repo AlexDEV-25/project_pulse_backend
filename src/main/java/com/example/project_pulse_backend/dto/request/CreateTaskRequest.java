@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -30,10 +30,10 @@ public class CreateTaskRequest {
     private String description;
 
     @NotNull(message = "Ngày bắt đầu task không được để trống")
-    private LocalDateTime startAt;
+    private LocalDate startAt;
 
     @NotNull(message = "Ngày kết thúc task không được để trống")
-    private LocalDateTime endAt;
+    private LocalDate endAt;
 
     @NotNull(message = "Điểm task không được để trống")
     @DecimalMin(value = "0.0", inclusive = false, message = "Điểm task phải lớn hơn 0")

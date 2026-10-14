@@ -52,7 +52,7 @@ public class EvmService {
 
         BigDecimal bac = project.getProjectBudget();
         LocalDateTime capturedAt = LocalDateTime.now();
-        BigDecimal pv = evmHelper.pv(projectId, capturedAt);
+        BigDecimal pv = evmHelper.pv(projectId, capturedAt.toLocalDate());
         BigDecimal ev = earningTransactionRepo.sumNetEarnedPointsByProjectId(project.getId(), EarningTransactionType.EARN);
         BigDecimal ac = taskCostTransactionRepo.sumCostPointsByProjectId(project.getId());
 

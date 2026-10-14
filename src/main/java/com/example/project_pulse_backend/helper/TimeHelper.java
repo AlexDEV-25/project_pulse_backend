@@ -6,87 +6,84 @@ import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Component
 public class TimeHelper {
 
     public static int workdays(
-            LocalDateTime startAt,
-            LocalDateTime endAt,
+            LocalDate startAt,
+            LocalDate endAt,
             List<LocalDate> makeUpDates,
             List<LocalDate> offDates) {
-        int workingDays = 0;
-        LocalDate start = startAt.toLocalDate();
-        LocalDate end = endAt.toLocalDate();
+        return workingDates(startAt, endAt, makeUpDates, offDates).size();
+    }
+
+    public static Set<LocalDate> workingDates(
+            LocalDate startAt,
+            LocalDate endAt,
+            List<LocalDate> makeUpDates,
+            List<LocalDate> offDates) {
+        LocalDate start = startAt;
+        LocalDate end = endAt;
+        Set<LocalDate> workingDates = new TreeSet<>();
 
         for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
             DayOfWeek day = date.getDayOfWeek();
-
             if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
-                workingDays++;
+                workingDates.add(date);
             }
         }
-        return workingDays + safeSize(makeUpDates) - safeSize(offDates);
+
+        if (makeUpDates != null) {
+            makeUpDates.stream()
+                    .filter(date -> date != null
+                            && !date.isBefore(start)
+                            && !date.isAfter(end)
+                            && isWeekend(date))
+                    .forEach(workingDates::add);
+        }
+        if (offDates != null) {
+            offDates.stream()
+                    .filter(date -> date != null && !isWeekend(date))
+                    .forEach(workingDates::remove);
+        }
+        return workingDates;
+    }
+
+    private static boolean isWeekend(LocalDate date) {
+        DayOfWeek day = date.getDayOfWeek();
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
     }
 
     public static int elapsedWorkdays(
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            LocalDateTime at,
+            LocalDate startAt,
+            LocalDate endAt,
+            LocalDate at,
             List<LocalDate> makeUpDates,
             List<LocalDate> offDates) {
-        if (!at.isAfter(startAt)) {
+        if (at.isBefore(startAt)) {
             return 0;
         }
 
-        LocalDateTime calculationTime = at.isAfter(endAt) ? endAt : at;
-        LocalDate startDate = startAt.toLocalDate();
-        LocalDate calculationDate = calculationTime.toLocalDate();
-        int elapsedWorkdays = 0;
-
-        for (LocalDate date = startDate; !date.isAfter(calculationDate); date = date.plusDays(1)) {
-            DayOfWeek day = date.getDayOfWeek();
-            if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
-                elapsedWorkdays++;
-            }
-        }
-
-        elapsedWorkdays += completedSpecialDates(makeUpDates, startDate, calculationTime);
-        elapsedWorkdays -= completedSpecialDates(offDates, startDate, calculationTime);
-        return elapsedWorkdays;
-    }
-
-    private static int safeSize(List<LocalDate> dates) {
-        return dates == null ? 0 : dates.size();
-    }
-
-    private static int completedSpecialDates(
-            List<LocalDate> dates, LocalDate startDate, LocalDateTime calculationTime) {
-        if (dates == null) {
-            return 0;
-        }
-        LocalDate calculationDate = calculationTime.toLocalDate();
-        return (int) dates.stream()
-                .filter(date -> date != null
-                        && !date.isBefore(startDate)
-                        && !date.isAfter(calculationDate)
-                        && calculationTime.isAfter(date.atStartOfDay()))
+        LocalDate calculationDate = at.isAfter(endAt) ? endAt : at;
+        return (int) workingDates(startAt, endAt, makeUpDates, offDates).stream()
+                .filter(date -> !date.isAfter(calculationDate))
                 .count();
     }
 
-    public static void checkStartBeforeEnd(LocalDateTime startAt, LocalDateTime endAt) {
+    public static void checkStartBeforeEnd(LocalDate startAt, LocalDate endAt) {
         if (startAt.isAfter(endAt)) {
             throw AppException.builder().appError(AppError.INVALID_DATE_RANGE).build();
         }
     }
 
     public static void checkWorkingDateInTask(
-            LocalDateTime workingDate, LocalDateTime taskStartAt, LocalDateTime taskEndAt) {
-        LocalDate workingDay = workingDate.toLocalDate();
-        if ((taskStartAt != null && workingDay.isBefore(taskStartAt.toLocalDate()))
-                || (taskEndAt != null && workingDay.isAfter(taskEndAt.toLocalDate()))) {
+            LocalDate workingDate, LocalDate taskStartAt, LocalDate taskEndAt) {
+        if ((taskStartAt != null && workingDate.isBefore(taskStartAt))
+                || (taskEndAt != null && workingDate.isAfter(taskEndAt))) {
             throw AppException.builder()
                     .appError(AppError.TASK_NOTE_WORKING_DATE_OUT_OF_RANGE)
                     .build();
@@ -94,10 +91,10 @@ public class TimeHelper {
     }
 
     public static void checkTaskInPhase(
-            LocalDateTime taskStartAt,
-            LocalDateTime taskEndAt,
-            LocalDateTime phaseStartAt,
-            LocalDateTime phaseEndAt) {
+            LocalDate taskStartAt,
+            LocalDate taskEndAt,
+            LocalDate phaseStartAt,
+            LocalDate phaseEndAt) {
         if (taskStartAt == null || taskEndAt == null
                 || taskStartAt.isBefore(phaseStartAt) || taskEndAt.isAfter(phaseEndAt)) {
             throw AppException.builder()
@@ -106,8 +103,8 @@ public class TimeHelper {
         }
     }
 
-    public static void checkPhaseInProject(LocalDateTime startAtPhase, LocalDateTime endAtPhase
-            , LocalDateTime startAtProject, LocalDateTime endAtProject) {
+    public static void checkPhaseInProject(
+            LocalDate startAtPhase, LocalDate endAtPhase, LocalDate startAtProject, LocalDate endAtProject) {
         if (startAtPhase.isBefore(startAtProject) || endAtPhase.isAfter(endAtProject)) {
             throw AppException.builder().appError(AppError.PHASE_OUT_OF_PROJECT_RANGE).build();
 

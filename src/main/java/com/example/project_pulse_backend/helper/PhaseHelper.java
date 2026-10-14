@@ -7,6 +7,7 @@ import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
+import com.example.project_pulse_backend.repository.AllocationRepo;
 import com.example.project_pulse_backend.repository.EarningTransactionRepo;
 import com.example.project_pulse_backend.repository.PhaseRepo;
 import com.example.project_pulse_backend.repository.TaskRepo;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +27,7 @@ import java.util.Set;
 public class PhaseHelper {
     private final PhaseRepo phaseRepo;
     private final TaskRepo taskRepo;
+    private final AllocationRepo allocationRepo;
     private final EarningTransactionRepo earningTransactionRepo;
     private final ProjectHelper projectHelper;
 
@@ -42,24 +43,31 @@ public class PhaseHelper {
         return phase;
     }
 
+    public Phase getPhaseByIdForUpdate(Long id, User user) {
+        Phase phase = phaseRepo.findByIdForUpdate(id).orElseThrow(
+                () -> AppException.builder().appError(AppError.PHASE_NOT_FOUND).build());
+        projectHelper.checkAccessToProject(phase.getProject().getId(), user);
+        return phase;
+    }
+
 
     public void checkPhaseNotDone(Phase phase) {
         if (phase.getStatus() == PhaseStatus.DONE) {
             throw AppException.builder().appError(AppError.PHASE_ALREADY_DONE).build();
         }
     }
-    
+
     public List<LocalDate> normalizeDates(List<LocalDate> dates) {
         return dates == null ? List.of() : new ArrayList<>(dates);
     }
 
     public void checkSpecialDates(
-            LocalDateTime startAt,
-            LocalDateTime endAt,
+            LocalDate startAt,
+            LocalDate endAt,
             List<LocalDate> makeUpDates,
             List<LocalDate> offDates) {
-        LocalDate start = startAt.toLocalDate();
-        LocalDate end = endAt.toLocalDate();
+        LocalDate start = startAt;
+        LocalDate end = endAt;
         Set<LocalDate> specialDates = new HashSet<>();
         for (LocalDate date : makeUpDates) {
             if (date == null || date.isBefore(start) || date.isAfter(end) || !specialDates.add(date)) {
@@ -73,7 +81,7 @@ public class PhaseHelper {
         }
     }
 
-    public void checkTime(Project project, LocalDateTime startAt, LocalDateTime endAt) {
+    public void checkTime(Project project, LocalDate startAt, LocalDate endAt) {
         TimeHelper.checkStartBeforeEnd(startAt, endAt);
         TimeHelper.checkPhaseInProject(startAt, endAt, project.getStartAt(), project.getEndAt());
     }
@@ -87,5 +95,19 @@ public class PhaseHelper {
                 phaseId, EarningTransactionType.EARN);
         return earnedPoints.multiply(BigDecimal.valueOf(100))
                 .divide(totalTaskPoints, 2, RoundingMode.HALF_UP);
+    }
+
+    // check xem đã có phase đó đã có phân bổ chưa
+    public void checkHasAllocation(Long phaseId) {
+        if (!allocationRepo.findByPhase_Id(phaseId).isEmpty()) {
+            throw AppException.builder().appError(AppError.PHASE_IN_USE).build();
+        }
+    }
+
+    // check xem đã có phase đó đã có task chưa
+    public void checkHasTask(Long phaseId) {
+        if (!taskRepo.findByPhase_Id(phaseId).isEmpty()) {
+            throw AppException.builder().appError(AppError.PHASE_IN_USE).build();
+        }
     }
 }

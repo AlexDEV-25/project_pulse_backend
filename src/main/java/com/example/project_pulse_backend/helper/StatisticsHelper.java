@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Component
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ public class StatisticsHelper {
 
 
     public static boolean isInProgressOrNearingDeadline(
-            Task task, LocalDateTime now, LocalDateTime nearingDeadline) {
+            Task task, LocalDate now, LocalDate nearingDeadline) {
         if (task.getTaskStatus() == TaskStatus.IN_PROGRESS) {
             return true;
         }
