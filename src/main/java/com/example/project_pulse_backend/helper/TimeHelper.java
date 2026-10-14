@@ -26,11 +26,9 @@ public class TimeHelper {
             LocalDate endAt,
             List<LocalDate> makeUpDates,
             List<LocalDate> offDates) {
-        LocalDate start = startAt;
-        LocalDate end = endAt;
         Set<LocalDate> workingDates = new TreeSet<>();
 
-        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+        for (LocalDate date = startAt; !date.isAfter(endAt); date = date.plusDays(1)) {
             DayOfWeek day = date.getDayOfWeek();
             if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
                 workingDates.add(date);
@@ -40,8 +38,8 @@ public class TimeHelper {
         if (makeUpDates != null) {
             makeUpDates.stream()
                     .filter(date -> date != null
-                            && !date.isBefore(start)
-                            && !date.isAfter(end)
+                            && !date.isBefore(startAt)
+                            && !date.isAfter(endAt)
                             && isWeekend(date))
                     .forEach(workingDates::add);
         }

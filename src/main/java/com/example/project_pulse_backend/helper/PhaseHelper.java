@@ -66,16 +66,15 @@ public class PhaseHelper {
             LocalDate endAt,
             List<LocalDate> makeUpDates,
             List<LocalDate> offDates) {
-        LocalDate start = startAt;
-        LocalDate end = endAt;
+
         Set<LocalDate> specialDates = new HashSet<>();
         for (LocalDate date : makeUpDates) {
-            if (date == null || date.isBefore(start) || date.isAfter(end) || !specialDates.add(date)) {
+            if (date == null || date.isBefore(startAt) || date.isAfter(endAt) || !specialDates.add(date)) {
                 throw AppException.builder().appError(AppError.PHASE_INVALID_SPECIAL_DATE).build();
             }
         }
         for (LocalDate date : offDates) {
-            if (date == null || date.isBefore(start) || date.isAfter(end) || !specialDates.add(date)) {
+            if (date == null || date.isBefore(startAt) || date.isAfter(endAt) || !specialDates.add(date)) {
                 throw AppException.builder().appError(AppError.PHASE_INVALID_SPECIAL_DATE).build();
             }
         }
