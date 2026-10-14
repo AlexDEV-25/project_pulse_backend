@@ -15,11 +15,12 @@ public interface AllocationRepo extends JpaRepository<Allocation, Long> {
 
     boolean existsByPhase_IdAndMember_Id(Long phaseId, Long memberId);
 
-    @EntityGraph(attributePaths = {"phase", "member", "member.user"})
+    @EntityGraph(attributePaths = {"phase", "member", "member.user", "overloadedDates"})
     List<Allocation> findAllByMember_User_Id(Long userId);
 
     List<Allocation> findByPhase_Id(Long phaseId);
 
+    @EntityGraph(attributePaths = {"overloadedDates"})
     @Query("""
             SELECT a
             FROM Allocation a

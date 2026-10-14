@@ -2,9 +2,9 @@ package com.example.project_pulse_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +33,17 @@ public class Allocation {
     private ProjectMember member;
 
     @ElementCollection
+    @BatchSize(size = 100)
     @CollectionTable(
             name = "allocation_overloaded_dates",
-            joinColumns = @JoinColumn(name = "allocation_id")
+            joinColumns = @JoinColumn(name = "allocation_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "uk_allocation_overloaded_date",
+                    columnNames = {"allocation_id", "overloaded_date"}
+            )
     )
-    @Column(name = "overloaded_date", nullable = false)
     @Builder.Default
-    private List<LocalDate> overloadedDates = new ArrayList<>();
+    private List<AllocationOverloadedDate> overloadedDates = new ArrayList<>();
 
     // resourceRateSnapshot =  User.resourceRate tại thời điểm phân bổ (bất biến trong suốt phase)
     @Column(name = "resource_rate_snapshot")

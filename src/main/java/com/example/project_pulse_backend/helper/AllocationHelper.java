@@ -2,6 +2,7 @@ package com.example.project_pulse_backend.helper;
 
 import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.entity.Allocation;
+import com.example.project_pulse_backend.entity.AllocationOverloadedDate;
 import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.entity.User;
@@ -87,8 +88,9 @@ public class AllocationHelper {
         }
 
         for (Allocation allocation : allocations) {
-            List<LocalDate> overloadedDates = workingDatesByAllocation.get(allocation).stream()
+            List<AllocationOverloadedDate> overloadedDates = workingDatesByAllocation.get(allocation).stream()
                     .filter(date -> dailyTotals.getOrDefault(date, 0) > 100)
+                    .map(date -> new AllocationOverloadedDate(date, dailyTotals.get(date)))
                     .toList();
             allocation.setOverloadedDates(overloadedDates);
         }

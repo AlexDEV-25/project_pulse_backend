@@ -4,6 +4,7 @@ import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.dto.request.CreateAllocationRequest;
 import com.example.project_pulse_backend.dto.request.UpdateAllocationRequest;
 import com.example.project_pulse_backend.dto.response.AllocationResponse;
+import com.example.project_pulse_backend.dto.response.OverloadedDateResponse;
 import com.example.project_pulse_backend.entity.Allocation;
 import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.ProjectMember;
@@ -136,7 +137,12 @@ public class AllocationService {
                 .allocationPoint(allocationHelper.calculateAllocationPoint(allocation))
                 .overloadedDates(allocation.getOverloadedDates() == null
                         ? List.of()
-                        : List.copyOf(allocation.getOverloadedDates()))
+                        : allocation.getOverloadedDates().stream()
+                                .map(date -> OverloadedDateResponse.builder()
+                                        .date(date.getDate())
+                                        .totalAllocationPercentage(date.getTotalAllocationPercentage())
+                                        .build())
+                                .toList())
                 .build();
     }
 
