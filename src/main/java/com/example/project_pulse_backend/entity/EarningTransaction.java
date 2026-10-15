@@ -23,7 +23,7 @@ public class EarningTransaction {
     @JoinColumn(name = "task_id")
     private Task task;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "executor_id", nullable = false)
     private ProjectMember executor;
 

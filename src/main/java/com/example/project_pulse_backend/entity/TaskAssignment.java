@@ -8,8 +8,8 @@ import lombok.*;
         name = "task_assignment",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_task_user",
-                        columnNames = {"task_id", "user_id"}
+                        name = "uk_task_employee",
+                        columnNames = {"task_id", "employee_id"}
                 )
         }
 )
@@ -29,7 +29,7 @@ public class TaskAssignment {
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private ProjectMember employee;
 

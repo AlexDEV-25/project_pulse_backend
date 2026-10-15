@@ -9,7 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "allocations")
+@Table(name = "allocations",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_phase_member",
+                        columnNames = {"phase_id", "member_id"}
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +27,7 @@ public class Allocation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    
+
     @Column(name = "allocation_percentage", nullable = false)
     private Integer allocationPercentage;
 
