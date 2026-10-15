@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ForgotPasswordRequest {
 
-    @Email(message = "Email không hợp lệ")
-    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "Email phải đúng định dạng ví dụ: example@gmail.com")
+    @Email(message = "EMAIL_INVALID")
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "EMAIL_EXAMPLE_FORMAT")
     private String email;
 
-    @NotBlank(message = "forgotPasswordCode không được để trống")
+    @NotBlank(message = "FORGOT_PASSWORD_CODE_REQUIRED")
     private String forgotPasswordCode;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt")
+    @NotBlank(message = "PASSWORD_REQUIRED")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "PASSWORD_FORMAT_INVALID")
     private String password;
 }

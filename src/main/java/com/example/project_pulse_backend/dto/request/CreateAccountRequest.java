@@ -14,32 +14,32 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CreateAccountRequest {
-    @Email(message = "Email không hợp lệ")
-    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "Email phải đúng định dạng ví dụ: example@gmail.com")
+    @Email(message = "EMAIL_INVALID")
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "EMAIL_EXAMPLE_FORMAT")
     private String email;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt")
+    @NotBlank(message = "PASSWORD_REQUIRED")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "PASSWORD_FORMAT_INVALID")
     private String password;
 
-    @NotEmpty(message = "role không được để trống")
+    @NotEmpty(message = "ROLE_LIST_REQUIRED")
     private List<String> roles;
 
-    @NotBlank(message = "Tên người dùng không được để trống")
-    @Size(min = 3, max = 50, message = "Tên người dùng phải từ 3 đến 50 ký tự")
+    @NotBlank(message = "USERNAME_REQUIRED")
+    @Size(min = 3, max = 50, message = "USERNAME_LENGTH_INVALID")
     private String userName;
 
-    @NotBlank(message = "Chức vụ không được để trống")
-    @Size(max = 100, message = "Chức vụ không được vượt quá 100 ký tự")
+    @NotBlank(message = "POSITION_REQUIRED")
+    @Size(max = 100, message = "POSITION_MAX_LENGTH_EXCEEDED")
     private String position;
 
-    @NotNull(message = "Resource rate không được để trống")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Resource rate không được nhỏ hơn 0")
-    @DecimalMax(value = "100.0", inclusive = true, message = "Resource rate không được lớn hơn 100")
+    @NotNull(message = "RESOURCE_RATE_REQUIRED")
+    @DecimalMin(value = "0.0", inclusive = true, message = "RESOURCE_RATE_BELOW_ZERO")
+    @DecimalMax(value = "100.0", inclusive = true, message = "RESOURCE_RATE_ABOVE_100")
     private BigDecimal resourceRate;
 
-    @NotNull(message = "DepartmentId không được để trống")
-    @Positive(message = "DepartmentId phải là số dương")
+    @NotNull(message = "DEPARTMENT_ID_REQUIRED")
+    @Positive(message = "DEPARTMENT_ID_MUST_BE_POSITIVE")
     private Long departmentId;
 
 }

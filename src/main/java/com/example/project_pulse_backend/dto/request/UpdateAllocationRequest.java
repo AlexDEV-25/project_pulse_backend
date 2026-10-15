@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class UpdateAllocationRequest {
     @NotNull(message = "ALLOCATION_PERCENTAGE_REQUIRED")
-    @Min(value = 1, message = "ALLOCATION_PERCENTAGE_MIN_1")
-    @Max(value = 100, message = "ALLOCATION_PERCENTAGE_MAX_100")
+    @Min(value = 1, message = "ALLOCATION_PERCENTAGE_MIN_INVALID")
+    @Max(value = 100, message = "ALLOCATION_PERCENTAGE_MAX_INVALID")
     private Integer allocationPercentage;
 }

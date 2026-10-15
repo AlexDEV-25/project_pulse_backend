@@ -20,24 +20,24 @@ import java.util.List;
 @Builder
 public class UpdateTaskRequest {
 
-    @NotBlank(message = "Tên task không được để trống")
+    @NotBlank(message = "TASK_NAME_REQUIRED")
     private String taskName;
 
     private String description;
 
-    @NotNull(message = "Ngày bắt đầu task không được để trống")
+    @NotNull(message = "TASK_START_DATE_REQUIRED")
     private LocalDate startAt;
 
-    @NotNull(message = "Ngày kết thúc task không được để trống")
+    @NotNull(message = "TASK_END_DATE_REQUIRED")
     private LocalDate endAt;
 
-    @NotNull(message = "Trạng thái task không được để trống")
+    @NotNull(message = "TASK_STATUS_REQUIRED")
     private TaskStatus taskStatus;
 
-    @NotNull(message = "Điểm task không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Điểm task phải lớn hơn 0")
+    @NotNull(message = "TASK_POINT_REQUIRED")
+    @DecimalMin(value = "0.0", inclusive = false, message = "TASK_POINT_MUST_BE_POSITIVE")
     private BigDecimal taskPoint;
 
-    @NotNull(message = "Danh sách phân công không được để trống")
+    @NotNull(message = "TASK_ASSIGNMENTS_REQUIRED")
     private List<@Valid TaskAssignmentRequest> assignments;
 }

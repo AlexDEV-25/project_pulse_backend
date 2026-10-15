@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CreateProjectMemberRequest {
-    @NotNull(message = "Project_ID khong duoc de trong")
+    @NotNull(message = "PROJECT_ID_REQUIRED")
     private Long projectId;
 
-    @NotNull(message = "User_ID khong duoc de trong")
+    @NotNull(message = "USER_ID_REQUIRED")
     private Long userId;
 }

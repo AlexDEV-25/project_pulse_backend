@@ -14,14 +14,14 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class CreateEarningTransferRequest {
-    @NotNull(message = "ID giao dịch earn gốc không được để trống")
+    @NotNull(message = "SOURCE_TRANSACTION_ID_REQUIRED")
     private Long sourceTransactionId;
 
-    @NotNull(message = "ID nhân viên nhận không được để trống")
+    @NotNull(message = "TARGET_EMPLOYEE_ID_REQUIRED")
     private Long targetEmployeeId;
 
-    @NotNull(message = "Số earn chuyển không được để trống")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Số earn chuyển phải lớn hơn 0")
+    @NotNull(message = "EARNING_POINTS_REQUIRED")
+    @DecimalMin(value = "0.0", inclusive = false, message = "EARNING_POINTS_MUST_BE_POSITIVE")
     private BigDecimal points;
 
     private String reason;

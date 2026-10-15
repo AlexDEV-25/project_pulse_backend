@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UpdateTaskStatusRequest {
-    @NotNull(message = "Trạng thái task không được để trống")
+    @NotNull(message = "TASK_STATUS_REQUIRED")
     private TaskStatus taskStatus;
 }

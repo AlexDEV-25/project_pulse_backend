@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ExchangeTokenRequest {
 
-    @NotBlank(message = "code không được để trống")
+    @NotBlank(message = "CODE_REQUIRED")
     private String code;
 
     private String clientId;

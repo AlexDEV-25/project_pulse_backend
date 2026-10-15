@@ -10,14 +10,14 @@ import lombok.Setter;
 @Setter
 public class CreateAllocationRequest {
 
-    @NotNull(message = "PHASE_ID_REQUIRED")
+    @NotNull(message = "ALLOCATION_PHASE_ID_REQUIRED")
     private Long phaseId;
 
-    @NotNull(message = "MEMBER_ID_REQUIRED")
+    @NotNull(message = "ALLOCATION_MEMBER_ID_REQUIRED")
     private Long memberId;
 
     @NotNull(message = "ALLOCATION_PERCENTAGE_REQUIRED")
-    @Min(value = 1, message = "ALLOCATION_PERCENTAGE_MIN_1")
-    @Max(value = 100, message = "ALLOCATION_PERCENTAGE_MAX_100")
+    @Min(value = 1, message = "ALLOCATION_PERCENTAGE_MIN_INVALID")
+    @Max(value = 100, message = "ALLOCATION_PERCENTAGE_MAX_INVALID")
     private Integer allocationPercentage;
 }

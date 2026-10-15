@@ -1,6 +1,7 @@
 package com.example.project_pulse_backend.exception;
 
 
+import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.dto.response.APIResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -25,9 +26,10 @@ public class GlobalException {
     ResponseEntity<APIResponse<String>> handlingMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         APIResponse<String> error = new APIResponse<String>();
         String message = e.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
-        error.setCode(9999);
-        error.setMessage(message);
-        return ResponseEntity.status(400).body(error);
+        AppError appError = AppError.valueOf(message);
+        error.setCode(appError.getCode());
+        error.setMessage(appError.getMessage());
+        return ResponseEntity.status(appError.getStatusCode()).body(error);
     }
 
     @ExceptionHandler(Exception.class)

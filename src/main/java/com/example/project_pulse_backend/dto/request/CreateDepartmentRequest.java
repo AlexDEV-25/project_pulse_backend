@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CreateDepartmentRequest {
-    @NotBlank(message = "Tên phòng ban không được để trống")
-    @Size(min = 2, max = 50, message = "Tên phòng ban phải từ 2 đến 50 ký tự")
+    @NotBlank(message = "DEPARTMENT_NAME_REQUIRED")
+    @Size(min = 2, max = 50, message = "DEPARTMENT_NAME_LENGTH_INVALID")
     private String departmentName;
 }

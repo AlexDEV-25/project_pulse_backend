@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SelectGoogleRoleRequest {
 
-    @NotBlank(message = "code không được để trống")
+    @NotBlank(message = "CODE_REQUIRED")
     private String code;
 
-    @NotBlank(message = "Role không được để trống")
+    @NotBlank(message = "ROLE_SELECTION_REQUIRED")
     private String role;
 }

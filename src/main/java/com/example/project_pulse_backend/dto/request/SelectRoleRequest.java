@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SelectRoleRequest {
 
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không đúng định dạng")
+    @NotBlank(message = "EMAIL_REQUIRED")
+    @Email(message = "EMAIL_INVALID_FORMAT")
     private String email;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt")
+    @NotBlank(message = "PASSWORD_REQUIRED")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "PASSWORD_FORMAT_INVALID")
     private String password;
 
-    @NotBlank(message = "Role không được để trống")
+    @NotBlank(message = "ROLE_SELECTION_REQUIRED")
     private String role;
 }

@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class TaskAssignmentRequest {
-    @NotNull(message = "EMPLOYEE_ID không được để trống")
+    @NotNull(message = "EMPLOYEE_ID_REQUIRED")
     private Long employeeId;
 
-    @NotNull(message = "Tỷ lệ đóng góp không được để trống")
-    @Min(value = 0, message = "Tỷ lệ đóng góp phải từ 0 đến 100")
-    @Max(value = 100, message = "Tỷ lệ đóng góp phải từ 0 đến 100")
+    @NotNull(message = "CONTRIBUTION_PERCENTAGE_REQUIRED")
+    @Min(value = 0, message = "CONTRIBUTION_PERCENTAGE_INVALID")
+    @Max(value = 100, message = "CONTRIBUTION_PERCENTAGE_INVALID")
     private Integer contributionPercentage;
 }

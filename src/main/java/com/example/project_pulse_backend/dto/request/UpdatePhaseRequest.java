@@ -18,17 +18,17 @@ import java.util.List;
 @Builder
 public class UpdatePhaseRequest {
 
-    @NotNull(message = "Start date cannot be null")
+    @NotNull(message = "START_DATE_REQUIRED")
     private LocalDate startAt;
 
-    @NotNull(message = "End date cannot be null")
+    @NotNull(message = "END_DATE_REQUIRED")
     private LocalDate endAt;
 
-    @NotBlank(message = "Ten phase khong duoc de trong")
-    @Size(min = 2, max = 100, message = "Ten phase phai tu 2 den 100 ky tu")
+    @NotBlank(message = "PHASE_NAME_REQUIRED")
+    @Size(min = 2, max = 100, message = "PHASE_NAME_LENGTH_INVALID")
     private String phaseName;
 
-    @NotNull(message = "Phase status cannot be null")
+    @NotNull(message = "PHASE_STATUS_REQUIRED")
     private PhaseStatus phaseStatus;
 
     private List<LocalDate> makeUpDates;

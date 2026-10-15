@@ -15,27 +15,27 @@ import java.util.List;
 @Builder
 public class UpdateUserRequest {
 
-    @NotNull(message = "User ID must not be null")
-    @Positive(message = "User ID must be positive")
+    @NotNull(message = "USER_ID_MUST_NOT_BE_NULL")
+    @Positive(message = "USER_ID_MUST_BE_POSITIVE")
     private Long id;
 
-    @NotBlank(message = "Username must not be blank")
-    @Size(max = 50, message = "Username must not exceed 50 characters")
+    @NotBlank(message = "USERNAME_MUST_NOT_BE_BLANK")
+    @Size(max = 50, message = "USERNAME_MAX_LENGTH_EXCEEDED")
     private String userName;
 
-    @NotBlank(message = "Position must not be blank")
-    @Size(max = 100, message = "Position must not exceed 100 characters")
+    @NotBlank(message = "POSITION_MUST_NOT_BE_BLANK")
+    @Size(max = 100, message = "POSITION_MAX_LENGTH_EN")
     private String position;
 
-    @NotNull(message = "Resource rate must not be null")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Resource rate must be greater than 0")
+    @NotNull(message = "RESOURCE_RATE_MUST_NOT_BE_NULL")
+    @DecimalMin(value = "0.0", inclusive = false, message = "RESOURCE_RATE_MUST_BE_POSITIVE")
     private BigDecimal resourceRate;
 
-    @NotNull(message = "Department ID must not be null")
-    @Positive(message = "Department ID must be positive")
+    @NotNull(message = "DEPARTMENT_ID_MUST_NOT_BE_NULL")
+    @Positive(message = "DEPARTMENT_ID_MUST_BE_POSITIVE_EN")
     private Long departmentId;
 
-    @NotEmpty(message = "Roles must not be empty")
-    private List<@NotBlank(message = "Role must not be blank") String> roles;
+    @NotEmpty(message = "ROLES_REQUIRED")
+    private List<@NotBlank(message = "ROLE_REQUIRED") String> roles;
 
 }

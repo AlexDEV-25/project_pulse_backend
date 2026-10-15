@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UpdatePhaseStatusRequest {
-    @NotNull(message = "Trang thai phase khong duoc de trong")
+    @NotNull(message = "PHASE_STATUS_REQUIRED_VI")
     private PhaseStatus status;
 }

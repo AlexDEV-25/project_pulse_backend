@@ -16,11 +16,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class CreateProjectRequest {
-    @NotBlank(message = "Tên project không được để trống")
-    @Size(min = 2, max = 100, message = "Tên project phải từ 2 đến 100 ký tự")
+    @NotBlank(message = "PROJECT_NAME_REQUIRED")
+    @Size(min = 2, max = 100, message = "PROJECT_NAME_LENGTH_INVALID")
     private String projectName;
 
-    @NotNull(message = "PM_ID không được để trống")
+    @NotNull(message = "PM_ID_REQUIRED")
     private Long pmId;
 
     private LocalDate startAt;

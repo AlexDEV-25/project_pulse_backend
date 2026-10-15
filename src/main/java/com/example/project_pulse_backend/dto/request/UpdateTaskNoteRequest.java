@@ -17,14 +17,14 @@ import java.time.LocalDate;
 @Builder
 public class UpdateTaskNoteRequest {
 
-    @NotNull(message = "Ngày làm việc không được để trống")
+    @NotNull(message = "WORKING_DATE_REQUIRED")
     private LocalDate workingDate;
 
-    @NotBlank(message = "Nội dung task note không được để trống")
+    @NotBlank(message = "TASK_NOTE_CONTENT_REQUIRED")
     private String content;
 
-    @NotNull(message = "Số giờ làm không được để trống")
-    @Min(value = 0, message = "Số giờ làm phải từ 0 đến 8")
-    @Max(value = 8, message = "Số giờ làm không được quá 8 tiếng")
+    @NotNull(message = "WORKING_HOURS_REQUIRED")
+    @Min(value = 0, message = "WORKING_HOURS_MIN_INVALID")
+    @Max(value = 8, message = "WORKING_HOURS_MAX_INVALID")
     private Integer workingHours;
 }
