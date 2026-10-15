@@ -142,8 +142,7 @@ public enum AppError {
     PROJECT_ID_REQUIRED_UPPER(1131, "Mã dự án không được để trống", HttpStatus.BAD_REQUEST),
     DEPARTMENT_NAME_REQUIRED(1132, "Tên phòng ban không được để trống", HttpStatus.BAD_REQUEST),
     DEPARTMENT_NAME_LENGTH_INVALID(1133, "Tên phòng ban phải từ 2 đến 50 ký tự", HttpStatus.BAD_REQUEST),
-    PHASE_STATUS_REQUIRED_VI(1134, "Trạng thái giai đoạn không được để trống", HttpStatus.BAD_REQUEST),
-    ROLE_SELECTION_REQUIRED(1135, "Vai trò không được để trống", HttpStatus.BAD_REQUEST);
+    ROLE_SELECTION_REQUIRED(1134, "Vai trò không được để trống", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

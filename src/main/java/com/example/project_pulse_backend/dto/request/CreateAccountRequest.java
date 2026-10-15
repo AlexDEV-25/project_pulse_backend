@@ -34,8 +34,8 @@ public class CreateAccountRequest {
     private String position;
 
     @NotNull(message = "RESOURCE_RATE_REQUIRED")
-    @DecimalMin(value = "0.0", inclusive = true, message = "RESOURCE_RATE_BELOW_ZERO")
-    @DecimalMax(value = "100.0", inclusive = true, message = "RESOURCE_RATE_ABOVE_100")
+    @DecimalMin(value = "0.0", message = "RESOURCE_RATE_BELOW_ZERO")
+    @DecimalMax(value = "100.0", message = "RESOURCE_RATE_ABOVE_100")
     private BigDecimal resourceRate;
 
     @NotNull(message = "DEPARTMENT_ID_REQUIRED")
