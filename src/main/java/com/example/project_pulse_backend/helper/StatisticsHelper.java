@@ -1,9 +1,7 @@
 package com.example.project_pulse_backend.helper;
 
-import com.example.project_pulse_backend.constant.ProjectStatus;
 import com.example.project_pulse_backend.constant.ScheduleStatus;
 import com.example.project_pulse_backend.constant.TaskStatus;
-import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.entity.Task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -28,8 +26,7 @@ public class StatisticsHelper {
         }
         return ScheduleStatus.ON_SCHEDULE;
     }
-
-
+    
     public static boolean isInProgressOrNearingDeadline(
             Task task, LocalDate now, LocalDate nearingDeadline) {
         if (task.getTaskStatus() == TaskStatus.IN_PROGRESS) {
@@ -40,10 +37,5 @@ public class StatisticsHelper {
                 && task.getEndAt() != null
                 && !task.getEndAt().isBefore(now)
                 && !task.getEndAt().isAfter(nearingDeadline);
-    }
-
-    public static boolean isNotFinished(Project project) {
-        return project.getProjectStatus() != ProjectStatus.DONE
-                && project.getProjectStatus() != ProjectStatus.CANCELLED;
     }
 }

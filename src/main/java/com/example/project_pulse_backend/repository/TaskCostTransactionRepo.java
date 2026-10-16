@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface TaskCostTransactionRepo extends JpaRepository<TaskCostTransaction, Long> {
+    // lấy task cost theo 1 phase
     @Query("""
             SELECT COALESCE(SUM(cost.points), 0)
             FROM TaskCostTransaction cost
@@ -16,6 +17,7 @@ public interface TaskCostTransactionRepo extends JpaRepository<TaskCostTransacti
             """)
     BigDecimal sumCostPointsByPhaseId(@Param("phaseId") Long phaseId);
 
+    // lấy task cost theo 1 project
     @Query("""
             SELECT COALESCE(SUM(cost.points), 0)
             FROM TaskCostTransaction cost
@@ -35,8 +37,12 @@ public interface TaskCostTransactionRepo extends JpaRepository<TaskCostTransacti
               )
             ORDER BY costTransaction.id ASC
             """)
-    List<TaskCostTransaction> findByProjectIdAndFilters(
+    List<TaskCostTransaction> filterTaskCost(
             @Param("projectId") Long projectId,
             @Param("phaseId") Long phaseId,
             @Param("keyword") String keyword);
+
+    List<TaskCostTransaction> findByExecutor_Id(Long executorId);
+
+    List<TaskCostTransaction> findByTask_Id(Long taskId);
 }

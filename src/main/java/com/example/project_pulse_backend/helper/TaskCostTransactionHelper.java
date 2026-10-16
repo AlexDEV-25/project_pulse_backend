@@ -23,7 +23,7 @@ public class TaskCostTransactionHelper {
     public List<TaskCostTransaction> getByProjectId(Long projectId, User user, String keyword, Long phaseId) {
 
         Project project = projectHelper.getProjectById(projectId, user);
-        return taskCostTransactionRepo.findByProjectIdAndFilters(project.getId(), phaseId, keyword);
+        return taskCostTransactionRepo.filterTaskCost(project.getId(), phaseId, keyword);
     }
 
     public TaskCostTransaction getById(Long id, User user) {
@@ -33,20 +33,19 @@ public class TaskCostTransactionHelper {
         projectHelper.checkAccessToProject(taskCostTransaction.getTask().getPhase().getProject().getId(), user);
         return taskCostTransaction;
     }
-
-
+    
     public void createTaskCostTransaction(Task task, ProjectMember employee, List<TaskNote> confirmedNotes) {
         BigDecimal workdays = BigDecimal.ZERO;
         BigDecimal costPoints = BigDecimal.ZERO;
 
-        for (TaskNote note : confirmedNotes) {
-            Allocation allocation = allocationRepo.findByPhase_IdAndMember_Id(
-                    task.getPhase().getId(), employee.getId()).orElseThrow(() -> AppException.builder()
-                    .appError(AppError.ALLOCATION_NOT_FOUND).build());
-            if (allocation.getResourceRateSnapshot() == null) {
-                throw AppException.builder().appError(AppError.ALLOCATION_RATE_NOT_FOUND).build();
-            }
+        Allocation allocation = allocationRepo.findByPhase_IdAndMember_Id(
+                task.getPhase().getId(), employee.getId()).orElseThrow(() -> AppException.builder()
+                .appError(AppError.ALLOCATION_NOT_FOUND).build());
+        if (allocation.getResourceRateSnapshot() == null) {
+            throw AppException.builder().appError(AppError.ALLOCATION_RATE_NOT_FOUND).build();
+        }
 
+        for (TaskNote note : confirmedNotes) {
             BigDecimal dayFraction = BigDecimal.valueOf(note.getWorkingHours())
                     .divide(HOURS_PER_WORKDAY, 2, RoundingMode.HALF_UP);
 

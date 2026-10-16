@@ -1,8 +1,8 @@
 package com.example.project_pulse_backend.repository;
 
 import com.example.project_pulse_backend.entity.Allocation;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface AllocationRepo extends JpaRepository<Allocation, Long> {
 
     boolean existsByPhase_IdAndMember_Id(Long phaseId, Long memberId);
+
+    boolean existsByMember_Id(Long memberId);
 
     @EntityGraph(attributePaths = {"phase", "member", "member.user", "overloadedDates"})
     List<Allocation> findAllByMember_User_Id(Long userId);
@@ -32,7 +34,7 @@ public interface AllocationRepo extends JpaRepository<Allocation, Long> {
                   OR LOWER(a.member.user.userName) LIKE LOWER(CONCAT('%', :keyword, '%'))
               )
             """)
-    List<Allocation> findByProjectId(
+    List<Allocation> filterAllocation(
             @Param("projectId") Long projectId,
             @Param("phaseId") Long phaseId,
             @Param("keyword") String keyword,

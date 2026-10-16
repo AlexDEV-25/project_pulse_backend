@@ -45,11 +45,11 @@ public class StatisticsService {
         LocalDate nearingDeadline = now.plusDays(NEARING_DEADLINE_DAYS);
 
         long overdue = projects.stream()
-                .filter(StatisticsHelper::isNotFinished)
+                .filter(projectHelper::isNotFinished)
                 .filter(project -> project.getEndAt() != null && project.getEndAt().isBefore(now))
                 .count();
         long nearing = projects.stream()
-                .filter(StatisticsHelper::isNotFinished)
+                .filter(projectHelper::isNotFinished)
                 .filter(project -> project.getEndAt() != null
                         && !project.getEndAt().isBefore(now)
                         && !project.getEndAt().isAfter(nearingDeadline))

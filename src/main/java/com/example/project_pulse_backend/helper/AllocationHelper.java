@@ -1,11 +1,7 @@
 package com.example.project_pulse_backend.helper;
 
 import com.example.project_pulse_backend.constant.AppError;
-import com.example.project_pulse_backend.entity.Allocation;
-import com.example.project_pulse_backend.entity.AllocationOverloadedDate;
-import com.example.project_pulse_backend.entity.Phase;
-import com.example.project_pulse_backend.entity.Project;
-import com.example.project_pulse_backend.entity.User;
+import com.example.project_pulse_backend.entity.*;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.repository.AllocationRepo;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +22,12 @@ public class AllocationHelper {
     private final ProjectHelper projectHelper;
     private final PhaseHelper phaseHelper;
 
-    // lấy phân bổ theo project
     public List<Allocation> getAllocationByProject(Long projectId, Long phaseId, User user, String keyword) {
         Project project = projectHelper.getProjectById(projectId, user);
-        return allocationRepo.findByProjectId(project.getId(), phaseId, keyword,
+        return allocationRepo.filterAllocation(project.getId(), phaseId, keyword,
                 RoleHelper.checkIsEmployee(user) ? user.getId() : null);
     }
 
-    // lấy phân bổ theo id
     public Allocation getAllocationById(Long id, User user) {
         Allocation allocation = allocationRepo.findById(id).orElseThrow(
                 () -> AppException.builder().appError(AppError.ALLOCATION_NOT_FOUND).build());
@@ -56,12 +50,12 @@ public class AllocationHelper {
         }
 
         Phase phase = allocation.getPhase();
-        int workdays = TimeHelper.workdays(
+        int workdays = TimeHelper.workingDates(
                 phase.getStartAt(),
                 phase.getEndAt(),
                 phase.getMakeUpDates(),
                 phase.getOffDates()
-        );
+        ).size();
 
         return BigDecimal.valueOf(workdays)
                 .multiply(resourceRate)
@@ -72,7 +66,7 @@ public class AllocationHelper {
     public void recalculateForUser(Long userId) {
         List<Allocation> allocations = allocationRepo.findAllByMember_User_Id(userId);
         Map<Allocation, Set<LocalDate>> workingDatesByAllocation = new HashMap<>();
-        Map<LocalDate, Integer> dailyTotals = new HashMap<>();
+        Map<LocalDate, Integer> totalDailyAllocation = new HashMap<>();
 
         for (Allocation allocation : allocations) {
             Phase phase = allocation.getPhase();
@@ -83,14 +77,14 @@ public class AllocationHelper {
                     phase.getOffDates());
             workingDatesByAllocation.put(allocation, workingDates);
             for (LocalDate date : workingDates) {
-                dailyTotals.merge(date, allocation.getAllocationPercentage(), Integer::sum);
+                totalDailyAllocation.merge(date, allocation.getAllocationPercentage(), Integer::sum);
             }
         }
 
         for (Allocation allocation : allocations) {
             List<AllocationOverloadedDate> overloadedDates = workingDatesByAllocation.get(allocation).stream()
-                    .filter(date -> dailyTotals.getOrDefault(date, 0) > 100)
-                    .map(date -> new AllocationOverloadedDate(date, dailyTotals.get(date)))
+                    .filter(date -> totalDailyAllocation.getOrDefault(date, 0) > 100)
+                    .map(date -> new AllocationOverloadedDate(date, totalDailyAllocation.get(date)))
                     .toList();
             allocation.setOverloadedDates(overloadedDates);
         }

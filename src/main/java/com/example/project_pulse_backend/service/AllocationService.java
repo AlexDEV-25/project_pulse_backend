@@ -18,7 +18,6 @@ import com.example.project_pulse_backend.repository.AllocationRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -26,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AllocationService {
     private final AllocationRepo allocationRepo;
     private final GetUserByToken getUserByToken;
@@ -34,28 +34,21 @@ public class AllocationService {
     private final AllocationHelper allocationHelper;
 
     @PreAuthorize("hasAuthority('CREATE_ALLOCATION')")
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public AllocationResponse createAllocation(CreateAllocationRequest request) {
         User user = getUserByToken.get();
-
-        Phase phase = phaseHelper.getPhaseByIdForUpdate(request.getPhaseId(), user);
+        Phase phase = phaseHelper.getPhaseById(request.getPhaseId(), user);
         allocationHelper.checkDone(phase);
 
         ProjectMember member = projectMemberHelper.getProjectMemberById(request.getMemberId(), user);
-
         Long userId = member.getUser().getId();
-
-        // LOCK toàn bộ ProjectMember có user_id trùng với user_id đang chọn để tránh race condition giữa 2 PM
-        projectMemberHelper.lockAllProjectMembersByUserId(userId);
 
         if (allocationRepo.existsByPhase_IdAndMember_Id(phase.getId(), member.getId())) {
             throw AppException.builder().appError(AppError.ALLOCATION_ALREADY_EXISTS).build();
         }
 
-        // Preserve the user's rate at the time the allocation is created.
         BigDecimal resourceRate = member.getUser().getResourceRate() != null
-                ? member.getUser().getResourceRate()
-                : BigDecimal.ZERO;
+                ? member.getUser().getResourceRate() : BigDecimal.ZERO;
 
         Allocation allocation = Allocation.builder()
                 .phase(phase)
@@ -70,7 +63,7 @@ public class AllocationService {
     }
 
     @PreAuthorize("hasAuthority('UPDATE_ALLOCATION')")
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public AllocationResponse updateAllocation(Long id, UpdateAllocationRequest request) {
         User user = getUserByToken.get();
 
@@ -80,10 +73,6 @@ public class AllocationService {
         Phase phase = allocation.getPhase();
         allocationHelper.checkDone(phase);
 
-        // KHÓA NGAY: Lock toàn bộ ProjectMember của nhân sự này để tránh race condition giữa 2 PM
-        projectMemberHelper.lockAllProjectMembersByUserId(userId);
-
-        // 4. Cập nhật tỷ lệ phân bổ mới
         allocation.setAllocationPercentage(request.getAllocationPercentage());
 
         Allocation saved = allocationRepo.save(allocation);
@@ -92,20 +81,18 @@ public class AllocationService {
     }
 
     @PreAuthorize("hasAuthority('DELETE_ALLOCATION')")
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public void deleteAllocation(Long id) {
         User user = getUserByToken.get();
 
         Allocation allocation = allocationHelper.getAllocationById(id, user);
         allocationHelper.checkDone(allocation.getPhase());
         Long userId = allocation.getMember().getUser().getId();
-        projectMemberHelper.lockAllProjectMembersByUserId(userId);
         allocationRepo.delete(allocation);
         allocationHelper.recalculateForUser(userId);
     }
 
     @PreAuthorize("hasAuthority('GET_ALLOCATIONS_BY_PROJECT')")
-    @Transactional(readOnly = true)
     public List<AllocationResponse> getAllocationsByProjectId(Long projectId, Long phaseId, String keyword) {
         User user = getUserByToken.get();
         return allocationHelper.getAllocationByProject(projectId, phaseId, user, keyword).stream()
@@ -113,7 +100,6 @@ public class AllocationService {
     }
 
     @PreAuthorize("hasAuthority('GET_ALLOCATIONS_BY_ID')")
-    @Transactional(readOnly = true)
     public AllocationResponse getAllocationById(Long id) {
         User user = getUserByToken.get();
         return toResponse(allocationHelper.getAllocationById(id, user));
@@ -138,11 +124,11 @@ public class AllocationService {
                 .overloadedDates(allocation.getOverloadedDates() == null
                         ? List.of()
                         : allocation.getOverloadedDates().stream()
-                                .map(date -> OverloadedDateResponse.builder()
-                                        .date(date.getDate())
-                                        .totalAllocationPercentage(date.getTotalAllocationPercentage())
-                                        .build())
-                                .toList())
+                          .map(date -> OverloadedDateResponse.builder()
+                                       .date(date.getDate())
+                                       .totalAllocationPercentage(date.getTotalAllocationPercentage())
+                                       .build())
+                          .toList())
                 .build();
     }
 

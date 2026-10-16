@@ -14,6 +14,10 @@ import java.util.Optional;
 
 public interface EarningTransactionRepo extends JpaRepository<EarningTransaction, Long> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT earning FROM EarningTransaction earning WHERE earning.id = :id")
+    Optional<EarningTransaction> findByIdForUpdate(@Param("id") Long id);
+
     @Query("""
             SELECT earning
             FROM EarningTransaction earning
@@ -28,21 +32,17 @@ public interface EarningTransactionRepo extends JpaRepository<EarningTransaction
               )
             ORDER BY earning.id ASC
             """)
-    List<EarningTransaction> findByProjectIdAndFilters(
+    List<EarningTransaction> filterEarningTransaction(
             @Param("projectId") Long projectId,
             @Param("phaseId") Long phaseId,
             @Param("earningTransactionType") EarningTransactionType earningTransactionType,
             @Param("keyword") String keyword);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT earning FROM EarningTransaction earning WHERE earning.id = :id")
-    Optional<EarningTransaction> findByIdForUpdate(@Param("id") Long id);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<EarningTransaction> findByReferenceTransaction_IdAndEarningTransactionType(
             Long referenceTransactionId,
             EarningTransactionType earningTransactionType);
 
+    // lấy tổng earn 1 phase
     @Query("""
             SELECT COALESCE(SUM(earning.points), 0)
             FROM EarningTransaction earning
@@ -53,6 +53,7 @@ public interface EarningTransactionRepo extends JpaRepository<EarningTransaction
             @Param("phaseId") Long phaseId,
             @Param("earnType") EarningTransactionType earnType);
 
+    // lấy tổng earn 1 project
     @Query("""
             SELECT COALESCE(SUM(earning.points), 0)
             FROM EarningTransaction earning
@@ -63,6 +64,7 @@ public interface EarningTransactionRepo extends JpaRepository<EarningTransaction
             @Param("projectId") Long projectId,
             @Param("earnType") EarningTransactionType earnType);
 
+    // lấy tổng earn 1 user nhận được
     @Query("""
             SELECT COALESCE(SUM(
                 CASE
@@ -85,6 +87,7 @@ public interface EarningTransactionRepo extends JpaRepository<EarningTransaction
             @Param("earnType") EarningTransactionType earnType,
             @Param("transferType") EarningTransactionType transferType);
 
+    // lấy tổng earn 1 user nhận được trong 1 project
     @Query("""
             SELECT COALESCE(SUM(
                 CASE
@@ -108,5 +111,8 @@ public interface EarningTransactionRepo extends JpaRepository<EarningTransaction
             @Param("projectId") Long projectId,
             @Param("earnType") EarningTransactionType earnType,
             @Param("transferType") EarningTransactionType transferType);
-    
+
+    List<EarningTransaction> findByExecutor_Id(Long executorId);
+
+    List<EarningTransaction> findByTask_Id(Long taskId);
 }

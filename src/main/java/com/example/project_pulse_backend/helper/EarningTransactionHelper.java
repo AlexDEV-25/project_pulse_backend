@@ -23,7 +23,7 @@ public class EarningTransactionHelper {
             String keyword, Long phaseId,
             EarningTransactionType earningTransactionType) {
         Project project = projectHelper.getProjectById(projectId, user);
-        return earningTransactionRepo.findByProjectIdAndFilters(
+        return earningTransactionRepo.filterEarningTransaction(
                 project.getId(), phaseId, earningTransactionType, keyword);
     }
 
