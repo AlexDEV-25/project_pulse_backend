@@ -24,7 +24,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class TaskNoteService {
     private final TaskNoteRepo taskNoteRepo;
     private final TaskHelper taskHelper;
@@ -35,22 +35,16 @@ public class TaskNoteService {
     private final TaskAssignmentHelper taskAssignmentHelper;
 
     @PreAuthorize("hasAuthority('CREATE_TASK_NOTE')")
+    @Transactional
     public TaskNoteResponse createTaskNote(CreateTaskNoteRequest request) {
         User user = getUserByToken.get();
         Task task = taskHelper.getById(request.getTaskId(), user);
         ProjectMember author = projectMemberHelper.findByProjectAndUser(task.getPhase().getProject(), user.getId(), user);
-
         taskAssignmentHelper.checkBelongToTask(task.getId(), author);
-
-        if (task.getAssignments() == null || task.getAssignments().stream()
-                .noneMatch(assignment -> assignment.getEmployee().getUser().getId().equals(user.getId()))) {
-            throw AppException.builder().appError(AppError.USER_NOT_BELONG_TO_TASK).build();
-        }
 
         if (task.getTaskStatus() != TaskStatus.IN_PROGRESS) {
             throw AppException.builder().appError(AppError.TASK_NOT_IN_PROGRESS).build();
         }
-
 
         TimeHelper.checkWorkingDateInTask(request.getWorkingDate(), task.getStartAt(), task.getEndAt());
 
@@ -66,6 +60,7 @@ public class TaskNoteService {
     }
 
     @PreAuthorize("hasAuthority('UPDATE_TASK_NOTE')")
+    @Transactional
     public TaskNoteResponse updateTaskNote(Long noteId, UpdateTaskNoteRequest request) {
         User user = getUserByToken.get();
         TaskNote taskNote = taskNoteRepo.findByIdForUpdate(noteId)
@@ -87,6 +82,7 @@ public class TaskNoteService {
     }
 
     @PreAuthorize("hasAuthority('DELETE_TASK_NOTE')")
+    @Transactional
     public void deleteTaskNote(Long noteId) {
         User employee = getUserByToken.get();
         TaskNote taskNote = taskNoteRepo.findByIdForUpdate(noteId)
@@ -106,6 +102,7 @@ public class TaskNoteService {
     }
 
     @PreAuthorize("hasAuthority('CONFIRM_TASK_NOTES')")
+    @Transactional
     public TaskNoteResponse confirmTaskNotes(Long TaskNoteId) {
         User pm = getUserByToken.get();
 

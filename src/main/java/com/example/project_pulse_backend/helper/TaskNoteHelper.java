@@ -21,7 +21,6 @@ public class TaskNoteHelper {
     private final TaskNoteRepo taskNoteRepo;
     private final ProjectHelper projectHelper;
 
-
     public void checkPendingConfirmation(TaskNote taskNote) {
         if (taskNote.getTaskNoteStatus() != TaskNoteStatus.PENDING_CONFIRMATION) {
             throw AppException.builder().appError(AppError.TASK_NOTE_NOT_PENDING).build();

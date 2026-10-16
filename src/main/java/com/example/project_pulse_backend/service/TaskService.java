@@ -1,7 +1,6 @@
 package com.example.project_pulse_backend.service;
 
 import com.example.project_pulse_backend.constant.AppError;
-import com.example.project_pulse_backend.constant.PhaseStatus;
 import com.example.project_pulse_backend.constant.TaskStatus;
 import com.example.project_pulse_backend.dto.request.CreateTaskRequest;
 import com.example.project_pulse_backend.dto.request.UpdateTaskRequest;
@@ -22,7 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class TaskService {
 
     private final TaskRepo taskRepo;
@@ -35,14 +34,12 @@ public class TaskService {
     private final ProjectMemberHelper projectMemberHelper;
 
     @PreAuthorize("hasAuthority('CREATE_TASK')")
+    @Transactional
     public TaskResponse createTask(CreateTaskRequest request) {
         User pm = getUserByToken.get();
-
-        Project project = projectHelper.getProjectById(request.getProjectId(), pm);
         Phase phase = phaseHelper.getPhaseById(request.getPhaseId(), pm);
 
-        taskHelper.checkDone(project, phase);
-        taskHelper.checkSameProject(project, phase);
+        taskHelper.checkDone(phase);
         taskHelper.checkTime(phase, request.getStartAt(), request.getEndAt());
 
         Task task = Task.builder()
@@ -55,24 +52,24 @@ public class TaskService {
                 .taskPoint(request.getTaskPoint())
                 .assignments(new ArrayList<>())
                 .build();
-        task.getAssignments().addAll(taskAssignmentHelper.createAssignments(task, project, request.getAssignments()));
+        task.getAssignments().addAll(taskAssignmentHelper.createAssignments(task, phase.getProject(), request.getAssignments()));
 
         return toResponse(taskRepo.save(task));
     }
 
     @PreAuthorize("hasAuthority('UPDATE_TASK')")
+    @Transactional
     public TaskResponse updateTask(Long id, UpdateTaskRequest request) {
         User pm = getUserByToken.get();
 
         Task task = taskRepo.findForUpdateById(id).orElseThrow(() -> AppException.builder().appError(AppError.TASK_NOT_FOUND).build());
-
         projectHelper.checkAccessToProject(task.getPhase().getProject().getId(), pm);
 
         if (task.getTaskStatus() == TaskStatus.DONE) {
             throw AppException.builder().appError(AppError.TASK_ALREADY_DONE).build();
         }
 
-        taskHelper.checkDone(task.getPhase().getProject(), task.getPhase());
+        taskHelper.checkDone(task.getPhase());
         taskHelper.checkTime(task.getPhase(), request.getStartAt(), request.getEndAt());
 
         if (request.getTaskStatus() == TaskStatus.DONE && task.getTaskStatus() != TaskStatus.IN_PROGRESS) {
@@ -88,7 +85,8 @@ public class TaskService {
         task.getAssignments().addAll(taskAssignmentHelper.createAssignments(
                 task, task.getPhase().getProject(), request.getAssignments()));
 
-        if (request.getTaskStatus() == TaskStatus.DONE) {
+        if (request.getTaskStatus() == TaskStatus.DONE && task.getTaskStatus() == TaskStatus.IN_PROGRESS) {
+            taskHelper.checkUnconfirmedTaskNotes(task);
             transactionHelper.createCompletionTransactions(task);
         }
         task.setTaskStatus(request.getTaskStatus());
@@ -97,20 +95,16 @@ public class TaskService {
     }
 
     @PreAuthorize("hasAuthority('DELETE_TASK')")
+    @Transactional
     public void deleteTask(Long id) {
         User pm = getUserByToken.get();
         Task task = taskHelper.getById(id, pm);
-        if (task.getPhase().getStatus() == PhaseStatus.DONE) {
-            throw AppException.builder().appError(AppError.TASK_PHASE_DONE).build();
-        }
-        if (task.getTaskStatus() != null && !task.getTaskStatus().name().equals("TODO")) {
-            throw AppException.builder().appError(AppError.TASK_IN_PROGRESS_CANNOT_DELETE).build();
-        }
+        taskHelper.checkDone(task.getPhase());
+        taskHelper.checkBeforeDelete(task.getId());
         taskRepo.delete(task);
     }
 
     @PreAuthorize("hasAuthority('GET_TASKS_BY_PROJECT')")
-    @Transactional(readOnly = true)
     public List<TaskResponse> getTasksByProject(Long projectId, String keyword, Long phaseId, Long userId) {
         User user = getUserByToken.get();
 
@@ -120,14 +114,7 @@ public class TaskService {
                 .toList();
     }
 
-    @PreAuthorize("hasAuthority('GET_TASKS_BY_PROJECT')")
-    @Transactional(readOnly = true)
-    public List<TaskResponse> getTasksByProject(Long projectId, String keyword, Long phaseId) {
-        return getTasksByProject(projectId, keyword, phaseId, null);
-    }
-    
     @PreAuthorize("hasAuthority('GET_TASK_BY_ID')")
-    @Transactional(readOnly = true)
     public TaskResponse getTaskById(Long id) {
         User user = getUserByToken.get();
         Task task = taskHelper.getById(id, user);
@@ -135,12 +122,14 @@ public class TaskService {
     }
 
     @PreAuthorize("hasAuthority('UPDATE_MY_TASK_STATUS_BY_ID')")
+    @Transactional
     public TaskResponse updateTaskStatus(Long id, UpdateTaskStatusRequest request) {
         User user = getUserByToken.get();
-        Task task = taskRepo.findById(id)
+        Task task = taskRepo.findForUpdateById(id)
                 .orElseThrow(() -> AppException.builder().appError(AppError.TASK_NOT_FOUND).build());
         ProjectMember author = projectMemberHelper.findByProjectAndUser(task.getPhase().getProject(), user.getId(), user);
 
+        taskHelper.checkDone(task.getPhase());
         taskAssignmentHelper.checkBelongToTask(task.getId(), author);
         taskHelper.checkEmployeeStatusTransition(task.getTaskStatus(), request.getTaskStatus());
         task.setTaskStatus(request.getTaskStatus());

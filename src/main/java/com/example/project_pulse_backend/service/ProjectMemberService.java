@@ -21,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProjectMemberService {
     private final ProjectMemberRepo projectMemberRepo;
     private final ProjectHelper projectHelper;
@@ -29,15 +30,15 @@ public class ProjectMemberService {
     private final ProjectMemberHelper projectMemberHelper;
 
     @PreAuthorize("hasAuthority('GET_PROJECT_MEMBERS_BY_PROJECT')")
-    @Transactional(readOnly = true)
     public List<ProjectMemberResponse> getMyProjectMembers(Long projectId, String keyword) {
         User user = getUserByToken.get();
-        List<ProjectMember> projectMembers = projectMemberRepo.findByProjectId(projectId, keyword);
+        List<ProjectMember> projectMembers = projectMemberRepo.filterProjectMember(projectId, keyword);
         projectHelper.checkAccessToProject(projectId, user);
         return projectMembers.stream().map(this::toResponse).toList();
     }
 
     @PreAuthorize("hasAuthority('CREATE_PROJECT_MEMBER')")
+    @Transactional
     public ProjectMemberResponse createProjectMember(CreateProjectMemberRequest request) {
         User user = getUserByToken.get();
         Project project = projectHelper.getProjectById(request.getProjectId(), user);
@@ -57,20 +58,18 @@ public class ProjectMemberService {
         }
 
         ProjectMember newProjectMember = projectMemberRepo.save(ProjectMember.builder()
-                .project(project)
-                .user(member)
-                .build());
+                .project(project).user(member).build());
 
         return toResponse(newProjectMember);
     }
 
     @PreAuthorize("hasAuthority('DELETE_PROJECT_MEMBER')")
+    @Transactional
     public void deleteProjectMember(Long id) {
         User user = getUserByToken.get();
         ProjectMember projectMember = projectMemberHelper.getProjectMemberById(id, user);
         projectHelper.checkProjectNotDone(projectMember.getProject());
-
-        // xử lý sau vì con nhiều case
+        projectMemberHelper.checkBeforeDeleteProjectMember(projectMember.getId());
         projectMemberRepo.delete(projectMember);
     }
 

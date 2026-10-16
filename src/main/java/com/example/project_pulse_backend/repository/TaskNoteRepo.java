@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TaskNoteRepo extends JpaRepository<TaskNote, Long> {
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+
     List<TaskNote> findByTask_IdOrderByCreatedAtAsc(Long taskId);
 
     List<TaskNote> findByTask_IdAndAuthor_IdAndTaskNoteStatusOrderByWorkingDateAsc(
@@ -21,4 +21,10 @@ public interface TaskNoteRepo extends JpaRepository<TaskNote, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT taskNote FROM TaskNote taskNote WHERE taskNote.id = :id")
     Optional<TaskNote> findByIdForUpdate(@Param("id") Long id);
+
+    List<TaskNote> findByAuthor_Id(Long authorId);
+
+    List<TaskNote> findByTask_Id(Long taskId);
+
+    boolean existsByTask_IdAndTaskNoteStatus(Long taskId, TaskNoteStatus status);
 }

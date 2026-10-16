@@ -1,5 +1,6 @@
 package com.example.project_pulse_backend.repository;
 
+import com.example.project_pulse_backend.constant.TaskStatus;
 import com.example.project_pulse_backend.entity.Task;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,7 +32,7 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
                     )
               )
             """)
-    List<Task> findByProjectIdAndFilters(
+    List<Task> filterTask(
             @Param("projectId") Long projectId,
             @Param("phaseId") Long phaseId,
             @Param("keyword") String keyword,
@@ -41,7 +42,6 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
     BigDecimal sumTaskPointsByPhaseId(@Param("phaseId") Long phaseId);
 
     List<Task> findByPhase_Id(Long phaseId);
-
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Task> findForUpdateById(Long id);
@@ -56,4 +56,5 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
             """)
     List<Task> findAssignedTasksWithDetails(@Param("employeeId") Long employeeId);
 
+    boolean existsByPhase_IdAndTaskStatusNotIn(Long phaseId, List<TaskStatus> statuses);
 }

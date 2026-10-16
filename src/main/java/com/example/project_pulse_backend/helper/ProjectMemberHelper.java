@@ -5,7 +5,7 @@ import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.entity.ProjectMember;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
-import com.example.project_pulse_backend.repository.ProjectMemberRepo;
+import com.example.project_pulse_backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +13,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProjectMemberHelper {
     private final ProjectMemberRepo projectMemberRepo;
+    private final TaskAssignmentRepo taskAssignmentRepo;
+    private final TaskNoteRepo taskNoteRepo;
+    private final TaskCostTransactionRepo taskCostTransactionRepo;
+    private final EarningTransactionRepo earningTransactionRepo;
+    private final AllocationRepo allocationRepo;
     private final ProjectHelper projectHelper;
-
 
     public ProjectMember getProjectMemberById(Long id, User user) {
         ProjectMember projectMember = projectMemberRepo.findById(id).orElseThrow(
@@ -31,8 +35,21 @@ public class ProjectMemberHelper {
         return projectMember;
     }
 
-
-    public void lockAllProjectMembersByUserId(Long userId) {
-        projectMemberRepo.findAllByUserIdWithLock(userId);
+    public void checkBeforeDeleteProjectMember(Long projectMemberId) {
+        if (!taskAssignmentRepo.findByEmployee_Id(projectMemberId).isEmpty()) {
+            throw AppException.builder().appError(AppError.PROJECT_MEMBER_IN_USE).build();
+        }
+        if (!taskNoteRepo.findByAuthor_Id(projectMemberId).isEmpty()) {
+            throw AppException.builder().appError(AppError.PROJECT_MEMBER_IN_USE).build();
+        }
+        if (!taskCostTransactionRepo.findByExecutor_Id(projectMemberId).isEmpty()) {
+            throw AppException.builder().appError(AppError.PROJECT_MEMBER_IN_USE).build();
+        }
+        if (!earningTransactionRepo.findByExecutor_Id(projectMemberId).isEmpty()) {
+            throw AppException.builder().appError(AppError.PROJECT_MEMBER_IN_USE).build();
+        }
+        if (allocationRepo.existsByMember_Id(projectMemberId)) {
+            throw AppException.builder().appError(AppError.PROJECT_MEMBER_IN_USE).build();
+        }
     }
 }

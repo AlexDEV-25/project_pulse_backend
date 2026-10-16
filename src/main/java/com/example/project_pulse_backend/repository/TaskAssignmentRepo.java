@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface TaskAssignmentRepo extends JpaRepository<TaskAssignment, Long> {
     List<TaskAssignment> findByTask_Id(Long taskId);
+
+    List<TaskAssignment> findByEmployee_Id(Long EmployeeId);
 }
