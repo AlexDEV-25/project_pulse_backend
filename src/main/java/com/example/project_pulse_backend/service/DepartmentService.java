@@ -12,22 +12,26 @@ import com.example.project_pulse_backend.repository.DepartmentRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DepartmentService {
     private final DepartmentRepo departmentRepo;
     private final UserHelper userHelper;
 
     @PreAuthorize("hasAuthority('CREATE_DEPARTMENT')")
+    @Transactional
     public DepartmentResponse createDepartment(CreateDepartmentRequest request) {
         Department newDepartment = departmentRepo.save(Department.builder().departmentName(request.getDepartmentName()).hidden(false).build());
         return toResponse(newDepartment);
     }
 
     @PreAuthorize("hasAuthority('UPDATE_DEPARTMENT')")
+    @Transactional
     public DepartmentResponse updateDepartment(Long id, UpdateDepartmentRequest request) {
         Department entity = departmentRepo.findById(id).orElseThrow(
                 () -> AppException.builder().appError(AppError.DEPARTMENT_NOT_FOUND).build());
@@ -38,8 +42,9 @@ public class DepartmentService {
         Department result = departmentRepo.save(entity);
         return toResponse(result);
     }
-    
+
     @PreAuthorize("hasAuthority('DELETE_DEPARTMENT')")
+    @Transactional
     public void deleteDepartment(Long id) {
         userHelper.checkDepartmentEmpty(id);
         departmentRepo.deleteById(id);

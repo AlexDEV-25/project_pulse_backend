@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -48,24 +47,12 @@ public class UserHelper {
     }
 
     public void checkDepartmentEmpty(Long departmentId) {
-        if (!userRepo.findByDepartment_Id(departmentId).isEmpty()) {
+        if (userRepo.existsByDepartment_Id(departmentId)) {
             throw AppException.builder().appError(AppError.DEPARTMENT_NOT_EMPTY).build();
         }
     }
 
     public long getUserCountByDepartment(Long departmentId) {
         return userRepo.countByDepartment_Id(departmentId);
-    }
-
-    public List<String> normalizeRoles(List<String> roleNames) {
-        if (roleNames == null) {
-            return List.of();
-        }
-        return roleNames.stream()
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(role -> !role.isEmpty())
-                .distinct()
-                .toList();
     }
 }

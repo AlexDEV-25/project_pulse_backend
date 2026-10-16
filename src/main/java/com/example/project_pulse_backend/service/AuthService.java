@@ -57,7 +57,6 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
     public AuthResponse login(AuthRequest request) {
         Auth authentication = authHelper.getAuthenticationByEmail(request.getEmail());
 
@@ -71,7 +70,6 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
     public AuthResponse selectRole(SelectRoleRequest request) {
         Auth authentication = authHelper.getAuthenticationByEmail(request.getEmail());
         if (!passwordEncoder.matches(request.getPassword(), authentication.getPassword())) {
@@ -81,7 +79,6 @@ public class AuthService {
         return createRoleTokenResponse(authentication, request.getRole());
     }
 
-    @Transactional(readOnly = true)
     public AuthResponse refreshToken(String oldToken) {
         try {
             SignedJWT signToken = jwtHelper.verifyToken(oldToken);
@@ -113,6 +110,7 @@ public class AuthService {
 
     }
 
+    @Transactional
     public void forgotPassword(String email) {
         Auth authentication = authHelper.getAuthenticationByEmail(email);
         String forgotPassWordCode = authHelper.generateActivationCode();
@@ -151,6 +149,7 @@ public class AuthService {
     }
 
     @PreAuthorize("hasAuthority('CHANGE_PASSWORD')")
+    @Transactional
     public void changePassword(ChangePasswordRequest request) {
         Auth auth = getAuthByToken.get();
         boolean isMatch = passwordEncoder.matches(
@@ -165,7 +164,6 @@ public class AuthService {
         }
     }
 
-    @Transactional(readOnly = true)
     public AuthResponse loginWithGoogle(String code) {
         Auth authentication;
         try {
@@ -179,7 +177,6 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
     public AuthResponse selectGoogleRole(SelectGoogleRoleRequest request) {
         Auth authentication;
         try {
@@ -189,7 +186,6 @@ public class AuthService {
         }
         return createRoleTokenResponse(authentication, request.getRole());
     }
-
 
     private AuthResponse createRoleTokenResponse(Auth authentication, String role) {
         if (authentication.getUser().getRoles().stream()

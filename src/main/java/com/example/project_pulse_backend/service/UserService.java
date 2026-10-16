@@ -20,12 +20,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -39,6 +39,7 @@ public class UserService {
     private final UserHelper userHelper;
 
     @PreAuthorize("hasAuthority('GET_USERS')")
+    @Transactional(readOnly = true)
     public List<UserResponse> getUsers(
             List<String> roleNames, List<Long> departmentIds, String keyword) {
         User currentUser = getUserByToken.get();
@@ -47,9 +48,8 @@ public class UserService {
             throw AppException.builder().appError(AppError.ACCESS_DENIED).build();
         }
 
-        List<String> selectedRoles = userHelper.normalizeRoles(roleNames);
-        List<Long> selectedDepartments = departmentIds == null ? List.of()
-                : departmentIds.stream().filter(Objects::nonNull).distinct().toList();
+        List<String> selectedRoles = roleNames == null ? List.of() : roleNames;
+        List<Long> selectedDepartments = departmentIds == null ? List.of() : departmentIds;
         String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
         return userRepo.findUsers(
                         normalizedKeyword,
@@ -61,6 +61,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('GET_STATISTICS_USERS')")
+    @Transactional(readOnly = true)
     public UserStatisticsResponse getUserStatistics() {
         Map<String, Long> usersByRole = new LinkedHashMap<>();
 
@@ -75,6 +76,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('GET_USER_BY_ID')")
+    @Transactional(readOnly = true)
     public UserResponse getById(Long id) {
         User currentUser = getUserByToken.get();
         User target = userRepo.findById(id).orElseThrow(
@@ -89,12 +91,14 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('GET_MY_INFO')")
+    @Transactional(readOnly = true)
     public UserResponse getMyInfo() {
         User info = getUserByToken.get();
         return toResponse(info);
     }
 
     @PreAuthorize("hasAuthority('UPDATE_AVATAR')")
+    @Transactional
     public UserResponse updateAvatar(MultipartFile avt) {
         User entity = getUserByToken.get();
         if (avt == null || avt.isEmpty()) {
@@ -138,6 +142,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('UPDATE_USER')")
+    @Transactional
     public UserResponse updateUser(UpdateUserRequest request) {
         User entity = userRepo.findById(request.getId()).orElseThrow(
                 () -> AppException.builder().appError(AppError.USER_NOT_FOUND).build());

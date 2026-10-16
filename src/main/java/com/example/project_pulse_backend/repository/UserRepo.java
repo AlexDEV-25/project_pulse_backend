@@ -8,9 +8,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface UserRepo extends JpaRepository<User, Long> {
-    List<User> findByDepartment_Id(Long departmentId);
 
     long countByDepartment_Id(Long departmentId);
+
+    boolean existsByDepartment_Id(Long departmentId);
 
     @Query("""
             SELECT COUNT(DISTINCT u)
