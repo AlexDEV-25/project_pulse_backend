@@ -51,11 +51,4 @@ public class Task {
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
-    @OneToMany(
-            mappedBy = "task",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private List<TaskNote> notes;
 }

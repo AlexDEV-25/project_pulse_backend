@@ -25,10 +25,10 @@ public class UpdateTaskRequest {
 
     private String description;
 
-    @NotNull(message = "TASK_START_DATE_REQUIRED")
+    @NotNull(message = "START_DATE_REQUIRED")
     private LocalDate startAt;
 
-    @NotNull(message = "TASK_END_DATE_REQUIRED")
+    @NotNull(message = "END_DATE_REQUIRED")
     private LocalDate endAt;
 
     @NotNull(message = "TASK_STATUS_REQUIRED")

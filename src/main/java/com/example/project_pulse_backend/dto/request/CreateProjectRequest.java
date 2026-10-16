@@ -1,5 +1,6 @@
 package com.example.project_pulse_backend.dto.request;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,9 +24,20 @@ public class CreateProjectRequest {
     @NotNull(message = "PM_ID_REQUIRED")
     private Long pmId;
 
+    @NotNull(message = "START_DATE_REQUIRED")
     private LocalDate startAt;
+
+    @NotNull(message = "END_DATE_REQUIRED")
     private LocalDate endAt;
+
+    @NotNull(message = "CLIENT_BUDGET_REQUIRED")
+    @DecimalMin(value = "0.0", inclusive = false, message = "BUDGET_MUST_BE_POSITIVE")
     private BigDecimal clientBudget;
+
+    @NotNull(message = "PROJECT_BUDGET_REQUIRED")
+    @DecimalMin(value = "0.0", inclusive = false, message = "BUDGET_MUST_BE_POSITIVE")
     private BigDecimal projectBudget;
+
     private String description;
+
 }

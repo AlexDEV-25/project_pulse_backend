@@ -18,8 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CreateTaskRequest {
-    @NotNull(message = "PROJECT_ID_REQUIRED_UPPER")
-    private Long projectId;
 
     @NotNull(message = "PHASE_ID_REQUIRED")
     private Long phaseId;
@@ -29,10 +27,10 @@ public class CreateTaskRequest {
 
     private String description;
 
-    @NotNull(message = "TASK_START_DATE_REQUIRED")
+    @NotNull(message = "START_DATE_REQUIRED")
     private LocalDate startAt;
 
-    @NotNull(message = "TASK_END_DATE_REQUIRED")
+    @NotNull(message = "END_DATE_REQUIRED")
     private LocalDate endAt;
 
     @NotNull(message = "TASK_POINT_REQUIRED")

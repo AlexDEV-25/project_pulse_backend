@@ -59,7 +59,7 @@ public enum AppError {
     INVALID_EARNING_TRANSFER(1048, "Thông tin chuyển điểm thưởng không hợp lệ", HttpStatus.BAD_REQUEST),
     EARNING_BALANCE_NOT_ENOUGH(1049, "Số điểm thưởng còn lại không đủ để chuyển", HttpStatus.BAD_REQUEST),
     ONLY_EMPLOYEE(1050, "Chỉ có thể chọn nhân viên", HttpStatus.BAD_REQUEST),
-    PROJECT_IN_PROGRESS(1051, "Dự án đang trong trạng thái tiến hành", HttpStatus.BAD_REQUEST),
+    HAS_PHASE_OUT_OF_PROJECT(1051, "có phase nằm ngoài project", HttpStatus.BAD_REQUEST),
     PROJECT_ALREADY_DONE(1052, "Dự án đã hoàn thành", HttpStatus.BAD_REQUEST),
     PROJECT_MISMATCH(1053, "Dự án không trùng khớp", HttpStatus.BAD_REQUEST),
     EARNING_NOT_FOUND(1054, "Không tìm thấy bản ghi giao dịch", HttpStatus.BAD_REQUEST),
@@ -108,8 +108,8 @@ public enum AppError {
     WORKING_HOURS_MIN_INVALID(1097, "Số giờ làm phải từ 0 đến 8", HttpStatus.BAD_REQUEST),
     WORKING_HOURS_MAX_INVALID(1098, "Số giờ làm không được quá 8 tiếng", HttpStatus.BAD_REQUEST),
     TASK_NAME_REQUIRED(1099, "Tên công việc không được để trống", HttpStatus.BAD_REQUEST),
-    TASK_START_DATE_REQUIRED(1100, "Ngày bắt đầu công việc không được để trống", HttpStatus.BAD_REQUEST),
-    TASK_END_DATE_REQUIRED(1101, "Ngày kết thúc công việc không được để trống", HttpStatus.BAD_REQUEST),
+    CLIENT_BUDGET_REQUIRED(1100, "Ngân sách khách hàng không được để trống", HttpStatus.BAD_REQUEST),
+    PROJECT_BUDGET_REQUIRED(1101, "Ngân sách dự án không được để trống", HttpStatus.BAD_REQUEST),
     TASK_STATUS_REQUIRED(1102, "Trạng thái công việc không được để trống", HttpStatus.BAD_REQUEST),
     TASK_POINT_REQUIRED(1103, "Điểm công việc không được để trống", HttpStatus.BAD_REQUEST),
     TASK_POINT_MUST_BE_POSITIVE(1104, "Điểm công việc phải lớn hơn 0", HttpStatus.BAD_REQUEST),
@@ -139,10 +139,18 @@ public enum AppError {
     USERNAME_MUST_NOT_BE_BLANK(1128, "Tên người dùng không được để trống", HttpStatus.BAD_REQUEST),
     POSITION_MAX_LENGTH_EN(1129, "Chức vụ không được vượt quá 100 ký tự", HttpStatus.BAD_REQUEST),
     RESOURCE_RATE_MUST_NOT_BE_NULL(1130, "Tỷ lệ nguồn lực không được để trống", HttpStatus.BAD_REQUEST),
-    PROJECT_ID_REQUIRED_UPPER(1131, "Mã dự án không được để trống", HttpStatus.BAD_REQUEST),
+    HAS_TASK_OUT_OF_PHASE(1131, "Có task nằm ngoài phase", HttpStatus.BAD_REQUEST),
     DEPARTMENT_NAME_REQUIRED(1132, "Tên phòng ban không được để trống", HttpStatus.BAD_REQUEST),
     DEPARTMENT_NAME_LENGTH_INVALID(1133, "Tên phòng ban phải từ 2 đến 50 ký tự", HttpStatus.BAD_REQUEST),
-    ROLE_SELECTION_REQUIRED(1134, "Vai trò không được để trống", HttpStatus.BAD_REQUEST);
+    ROLE_SELECTION_REQUIRED(1134, "Vai trò không được để trống", HttpStatus.BAD_REQUEST),
+    PROJECT_MEMBER_IN_USE(1135, "Thành viên dự án đã được sử dụng", HttpStatus.BAD_REQUEST),
+    HAS_TASK_NOTE_UNCONFIRMED(1136, "Vẫn còn task note chưa xác nhận", HttpStatus.BAD_REQUEST),
+    HAS_TASK_NOT_DONE(1137, "Vẫn còn task chưa xong", HttpStatus.BAD_REQUEST),
+    BUDGET_MUST_BE_POSITIVE(1138, "Ngân sách không được âm", HttpStatus.BAD_REQUEST),
+    PHASE_NOT_IN_PROGRESS(1139, "Giai đoạn chưa được bắt đầu", HttpStatus.BAD_REQUEST),
+    PROJECT_IN_USE(1140, "Không thể xóa dự án đang có thành viên hoặc giai đoạn", HttpStatus.BAD_REQUEST),
+    HAS_PHASE_NOT_DONE(1141, "Vẫn còn giai đoạn chưa hoàn thành", HttpStatus.BAD_REQUEST),
+    TASK_IN_USE(1142, "Không thể xóa công việc đã phát sinh ghi chú hoặc chi phí", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;
