@@ -20,7 +20,7 @@ public interface ProjectRepo extends JpaRepository<Project, Long> {
               AND (:keyword IS NULL
                     OR LOWER(project.projectName) LIKE LOWER(CONCAT('%', :keyword, '%')))
             """)
-    List<Project> searchProjects(
+    List<Project> filterProjects(
             @Param("pmId") Long pmId,
             @Param("status") ProjectStatus status,
             @Param("keyword") String keyword);

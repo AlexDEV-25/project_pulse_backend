@@ -98,9 +98,9 @@ public class EvmHelper {
             return allocationPoint;
         }
 
-        int phaseWorkdays = TimeHelper.workdays(
-                phaseStartAt, phaseEndAt, makeUpDates, offDates);
-        if (phaseWorkdays <= 0) {
+        int phaseWorkdays = TimeHelper.workingDates(
+                phaseStartAt, phaseEndAt, makeUpDates, offDates).size();
+        if (phaseWorkdays == 0) {
             return BigDecimal.ZERO;
         }
         int elapsedWorkdays = Math.clamp(
@@ -131,7 +131,7 @@ public class EvmHelper {
 
     public BigDecimal pv(Long projectId, LocalDate at) {
         BigDecimal total = BigDecimal.ZERO;
-        for (var allocation : allocationRepo.findByProjectId(projectId, null, null, null)) {
+        for (var allocation : allocationRepo.filterAllocation(projectId, null, null, null)) {
             Phase phase = allocation.getPhase();
             total = total.add(plannedValueAt(
                     allocationHelper.calculateAllocationPoint(allocation),

@@ -24,6 +24,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProjectService {
     private final ProjectRepo projectRepo;
     private final ProjectMemberRepo projectMemberRepo;
@@ -32,6 +33,7 @@ public class ProjectService {
     private final ProjectHelper projectHelper;
 
     @PreAuthorize("hasAuthority('CREATE_PROJECT')")
+    @Transactional
     public ProjectResponse createProject(CreateProjectRequest request) {
         User pm = userRepo.findById(request.getPmId()).orElseThrow(
                 () -> AppException.builder().appError(AppError.USER_NOT_FOUND).build());
@@ -56,6 +58,7 @@ public class ProjectService {
     }
 
     @PreAuthorize("hasAuthority('UPDATE_PROJECT')")
+    @Transactional
     public ProjectResponse updateProject(Long id, UpdateProjectRequest request) {
         Project entity = projectRepo.findById(id).orElseThrow(
                 () -> AppException.builder().appError(AppError.PROJECT_NOT_FOUND).build());
@@ -75,28 +78,28 @@ public class ProjectService {
         entity.setClientBudget(request.getClientBudget());
         entity.setProjectBudget(request.getProjectBudget());
         entity.setDescription(request.getDescription());
+
+        if (request.getProjectStatus() == ProjectStatus.DONE) {
+            projectHelper.checkInProgressPhases(entity);
+        }
         entity.setProjectStatus(request.getProjectStatus());
+
+        projectHelper.checkTime(entity);
 
         return toResponseForAdmin(projectRepo.save(entity));
     }
 
     @PreAuthorize("hasAuthority('DELETE_PROJECT')")
+    @Transactional
     public void deleteProject(Long id) {
         Project project = projectRepo.findById(id).orElseThrow(
-                () -> AppException.builder().appError(AppError.PROJECT_NOT_FOUND).build()
-        );
-        /* chưa đủ điều kiện
-         * - có thể đã có phase
-         * - có thể đã có project member
-         * */
-        if (project.getProjectStatus() != ProjectStatus.DRAFT) {
-            throw AppException.builder().appError(AppError.PROJECT_IN_PROGRESS).build();
-        }
-        projectRepo.deleteById(id);
+                () -> AppException.builder().appError(AppError.PROJECT_NOT_FOUND).build());
+        projectHelper.checkProjectNotDone(project);
+        projectHelper.checkBeforeDelete(id);
+        projectRepo.delete(project);
     }
 
     @PreAuthorize("hasAuthority('GET_PROJECTS')")
-    @Transactional(readOnly = true)
     public List<ProjectResponse> getAllProjects(Long pmId, String keyword, ProjectStatus status) {
         String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
         User user = getUserByToken.get();
@@ -104,12 +107,12 @@ public class ProjectService {
         Long filteredPmId;
         if (RoleHelper.checkIsAdmin(user)) {
             filteredPmId = pmId;
-            List<Project> projects = projectRepo.searchProjects(filteredPmId, status, normalizedKeyword);
+            List<Project> projects = projectRepo.filterProjects(filteredPmId, status, normalizedKeyword);
             return projects.stream().map(this::toResponseForAdmin).toList();
 
         } else if (RoleHelper.checkIsPm(user)) {
             filteredPmId = user.getId();
-            List<Project> projects = projectRepo.searchProjects(filteredPmId, status, normalizedKeyword);
+            List<Project> projects = projectRepo.filterProjects(filteredPmId, status, normalizedKeyword);
             return projects.stream().map(this::toResponseForPm).toList();
 
         } else if (RoleHelper.checkIsEmployee(user)) {
@@ -124,7 +127,6 @@ public class ProjectService {
     }
 
     @PreAuthorize("hasAuthority('GET_PROJECT_BY_ID')")
-    @Transactional(readOnly = true)
     public ProjectResponse getProjectById(Long id) {
         User user = getUserByToken.get();
         Project project = projectHelper.getProjectById(id, user);

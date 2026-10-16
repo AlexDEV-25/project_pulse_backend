@@ -3,8 +3,10 @@ package com.example.project_pulse_backend.helper;
 import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.constant.EarningTransactionType;
 import com.example.project_pulse_backend.constant.PhaseStatus;
+import com.example.project_pulse_backend.constant.TaskStatus;
 import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.Project;
+import com.example.project_pulse_backend.entity.Task;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.repository.AllocationRepo;
@@ -33,7 +35,7 @@ public class PhaseHelper {
 
     public List<Phase> getPhasesByProject(Long projectId, User user, String keyword) {
         projectHelper.checkAccessToProject(projectId, user);
-        return phaseRepo.searchByProjectIdAndKeyword(projectId, keyword);
+        return phaseRepo.filterPhase(projectId, keyword);
     }
 
     public Phase getPhaseById(Long id, User user) {
@@ -42,14 +44,6 @@ public class PhaseHelper {
         projectHelper.checkAccessToProject(phase.getProject().getId(), user);
         return phase;
     }
-
-    public Phase getPhaseByIdForUpdate(Long id, User user) {
-        Phase phase = phaseRepo.findByIdForUpdate(id).orElseThrow(
-                () -> AppException.builder().appError(AppError.PHASE_NOT_FOUND).build());
-        projectHelper.checkAccessToProject(phase.getProject().getId(), user);
-        return phase;
-    }
-
 
     public void checkPhaseNotDone(Phase phase) {
         if (phase.getStatus() == PhaseStatus.DONE) {
@@ -69,22 +63,36 @@ public class PhaseHelper {
 
         Set<LocalDate> specialDates = new HashSet<>();
         for (LocalDate date : makeUpDates) {
-            if (date == null || date.isBefore(startAt) || date.isAfter(endAt) || !specialDates.add(date)) {
+            if (date == null || date.isBefore(startAt) || date.isAfter(endAt)
+                    || !specialDates.add(date) || !TimeHelper.isWeekend(date)) {
                 throw AppException.builder().appError(AppError.PHASE_INVALID_SPECIAL_DATE).build();
             }
         }
         for (LocalDate date : offDates) {
-            if (date == null || date.isBefore(startAt) || date.isAfter(endAt) || !specialDates.add(date)) {
+            if (date == null || date.isBefore(startAt) || date.isAfter(endAt)
+                    || !specialDates.add(date) || TimeHelper.isWeekend(date)) {
                 throw AppException.builder().appError(AppError.PHASE_INVALID_SPECIAL_DATE).build();
             }
         }
     }
 
-    public void checkTime(Project project, LocalDate startAt, LocalDate endAt) {
+    public void checkTime(Phase phase, Project project, LocalDate startAt, LocalDate endAt) {
         TimeHelper.checkStartBeforeEnd(startAt, endAt);
         TimeHelper.checkPhaseInProject(startAt, endAt, project.getStartAt(), project.getEndAt());
+        if (phase != null) {
+            List<Task> tasks = taskRepo.findByPhase_Id(phase.getId());
+            for (Task task : tasks) {
+                try {
+                    TimeHelper.checkTaskInPhase(
+                            task.getStartAt(), task.getEndAt(), startAt, endAt);
+                } catch (AppException e) {
+                    throw new AppException(AppError.HAS_TASK_OUT_OF_PHASE);
+                }
+            }
+        }
     }
 
+    // tiến độ phase = tổng earn trong phase / tổng task point trong phase
     public BigDecimal calculateProgress(Long phaseId) {
         BigDecimal totalTaskPoints = taskRepo.sumTaskPointsByPhaseId(phaseId);
         if (totalTaskPoints.signum() == 0) {
@@ -96,17 +104,18 @@ public class PhaseHelper {
                 .divide(totalTaskPoints, 2, RoundingMode.HALF_UP);
     }
 
-    // check xem đã có phase đó đã có phân bổ chưa
-    public void checkHasAllocation(Long phaseId) {
+    public void checkBeforeDelete(Long phaseId) {
         if (!allocationRepo.findByPhase_Id(phaseId).isEmpty()) {
+            throw AppException.builder().appError(AppError.PHASE_IN_USE).build();
+        }
+        if (!taskRepo.findByPhase_Id(phaseId).isEmpty()) {
             throw AppException.builder().appError(AppError.PHASE_IN_USE).build();
         }
     }
 
-    // check xem đã có phase đó đã có task chưa
-    public void checkHasTask(Long phaseId) {
-        if (!taskRepo.findByPhase_Id(phaseId).isEmpty()) {
-            throw AppException.builder().appError(AppError.PHASE_IN_USE).build();
+    public void checkInProgressTasks(Phase phase) {
+        if (taskRepo.existsByPhase_IdAndTaskStatusNotIn(phase.getId(), List.of(TaskStatus.DONE, TaskStatus.CANCELED))) {
+            throw new AppException(AppError.HAS_TASK_NOT_DONE);
         }
     }
 }
