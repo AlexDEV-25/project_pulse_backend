@@ -2,6 +2,9 @@ package com.example.project_pulse_backend.helper;
 
 import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.constant.EarningTransactionType;
+import com.example.project_pulse_backend.constant.NotificationType;
+import com.example.project_pulse_backend.dto.request.CreateUserNotificationRequest;
+import com.example.project_pulse_backend.dto.request.NotificationRequest;
 import com.example.project_pulse_backend.entity.*;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.repository.EarningTransactionRepo;
@@ -17,6 +20,7 @@ import java.util.List;
 public class EarningTransactionHelper {
     private final EarningTransactionRepo earningTransactionRepo;
     private final ProjectHelper projectHelper;
+    private final NotificationHelper notificationHelper;
 
     public List<EarningTransaction> getByProjectId(
             Long projectId, User user,
@@ -33,11 +37,11 @@ public class EarningTransactionHelper {
                 () -> AppException.builder().appError(AppError.EARNING_NOT_FOUND).build());
     }
 
-    public void createEarningTransaction(Task task, TaskAssignment assignment, ProjectMember employee) {
+    public EarningTransaction createEarningTransaction(Task task, TaskAssignment assignment, ProjectMember employee) {
         BigDecimal earnedPoints = task.getTaskPoint()
                 .multiply(BigDecimal.valueOf(assignment.getContributionPercentage()))
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        earningTransactionRepo.save(EarningTransaction.builder()
+        return earningTransactionRepo.save(EarningTransaction.builder()
                 .task(task)
                 .executor(employee)
                 .points(earnedPoints)
@@ -65,5 +69,65 @@ public class EarningTransactionHelper {
         return previousTransfers.stream()
                 .map(EarningTransaction::getPoints)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public void getTransferFormTaskNotification(EarningTransaction source, EarningTransaction newTransfer) {
+        Long projectId = newTransfer.getTask() != null
+                && newTransfer.getTask().getPhase() != null
+                && newTransfer.getTask().getPhase().getProject() != null
+                ? newTransfer.getTask().getPhase().getProject().getId() : null;
+        Double points = newTransfer.getPoints() != null ? newTransfer.getPoints().doubleValue() : 0.0;
+        User pm = source.getTask() != null
+                && source.getTask().getPhase() != null
+                && source.getTask().getPhase().getProject() != null
+                ? source.getTask().getPhase().getProject().getPm() : null;
+
+        Notification notification = notificationHelper.createNotification(NotificationRequest.builder()
+                .content(notificationHelper.getTransferFormTaskNotification(
+                        points, newTransfer.getTask().getTaskName(), source.getExecutor().getUser().getUserName()))
+                .link(notificationHelper.linkToTransfer(projectId))
+                .type(NotificationType.INFO)
+                .build());
+
+        if (pm != null && newTransfer.getExecutor() != null && newTransfer.getExecutor().getUser() != null) {
+            notificationHelper.createUserNotification(CreateUserNotificationRequest.builder()
+                    .sender(pm)
+                    .receiver(newTransfer.getExecutor().getUser())
+                    .notification(notification)
+                    .build());
+        }
+    }
+
+    public void transferPointFormTaskNotification(EarningTransaction source, EarningTransaction newTransfer) {
+        Long projectId = newTransfer.getTask() != null
+                && newTransfer.getTask().getPhase() != null
+                && newTransfer.getTask().getPhase().getProject() != null
+                ? newTransfer.getTask().getPhase().getProject().getId() : null;
+        Double points = newTransfer.getPoints() != null ? newTransfer.getPoints().doubleValue() : 0.0;
+        User pm = newTransfer.getTask() != null
+                && newTransfer.getTask().getPhase() != null
+                && newTransfer.getTask().getPhase().getProject() != null
+                ? newTransfer.getTask().getPhase().getProject().getPm() : null;
+
+        Notification notification = notificationHelper.createNotification(NotificationRequest.builder()
+                .content(notificationHelper.transferPointFormTaskNotification(
+                        points, newTransfer.getTask().getTaskName(), newTransfer.getExecutor().getUser().getUserName()))
+                .link(notificationHelper.linkToTransfer(projectId))
+                .type(NotificationType.INFO)
+                .build());
+
+        if (pm != null && source != null && source.getExecutor() != null && source.getExecutor().getUser() != null) {
+            notificationHelper.createUserNotification(CreateUserNotificationRequest.builder()
+                    .sender(pm)
+                    .receiver(source.getExecutor().getUser())
+                    .notification(notification)
+                    .build());
+        }
+    }
+
+    public void transferPointFormTaskNotification(EarningTransaction newTransfer) {
+        if (newTransfer != null && newTransfer.getReferenceTransaction() != null) {
+            transferPointFormTaskNotification(newTransfer.getReferenceTransaction(), newTransfer);
+        }
     }
 }

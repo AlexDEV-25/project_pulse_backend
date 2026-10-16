@@ -1,10 +1,10 @@
 package com.example.project_pulse_backend.helper;
 
 import com.example.project_pulse_backend.constant.AppError;
-import com.example.project_pulse_backend.entity.ProjectMember;
-import com.example.project_pulse_backend.entity.Task;
-import com.example.project_pulse_backend.entity.TaskAssignment;
-import com.example.project_pulse_backend.entity.TaskNote;
+import com.example.project_pulse_backend.constant.NotificationType;
+import com.example.project_pulse_backend.dto.request.CreateUserNotificationRequest;
+import com.example.project_pulse_backend.dto.request.NotificationRequest;
+import com.example.project_pulse_backend.entity.*;
 import com.example.project_pulse_backend.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +17,7 @@ public class TransactionHelper {
     private final TaskNoteHelper taskNoteHelper;
     private final EarningTransactionHelper earningTransactionHelper;
     private final TaskCostTransactionHelper taskCostTransactionHelper;
+    private final NotificationHelper notificationHelper;
 
     public void createCompletionTransactions(Task task) {
         if (task.getAssignments() == null || task.getAssignments().isEmpty()) {
@@ -27,10 +28,38 @@ public class TransactionHelper {
             ProjectMember employee = assignment.getEmployee();
             List<TaskNote> confirmedNotes = taskNoteHelper.checkTaskNotesExist(task, employee);
 
-            earningTransactionHelper.createEarningTransaction(task, assignment, employee);
+            EarningTransaction newEarningTransaction = earningTransactionHelper.createEarningTransaction(task, assignment, employee);
+            this.getPointFormTaskNotification(newEarningTransaction);
+
             taskCostTransactionHelper.createTaskCostTransaction(task, employee, confirmedNotes);
         }
     }
 
+    private void getPointFormTaskNotification(EarningTransaction newEarningTransaction) {
+        Long projectId = newEarningTransaction.getTask() != null
+                && newEarningTransaction.getTask().getPhase() != null
+                && newEarningTransaction.getTask().getPhase().getProject() != null
+                ? newEarningTransaction.getTask().getPhase().getProject().getId() : null;
+        Double points = newEarningTransaction.getPoints() != null
+                ? newEarningTransaction.getPoints().doubleValue() : 0.0;
+        User pm = newEarningTransaction.getTask() != null
+                && newEarningTransaction.getTask().getPhase() != null
+                && newEarningTransaction.getTask().getPhase().getProject() != null
+                ? newEarningTransaction.getTask().getPhase().getProject().getPm() : null;
 
+        Notification notification = notificationHelper.createNotification(NotificationRequest.builder()
+                .content(notificationHelper.getPointFormTaskNotification(
+                        points, newEarningTransaction.getTask().getTaskName()))
+                .link(notificationHelper.linkToEarn(projectId))
+                .type(NotificationType.INFO)
+                .build());
+
+        if (pm != null && newEarningTransaction.getExecutor() != null && newEarningTransaction.getExecutor().getUser() != null) {
+            notificationHelper.createUserNotification(CreateUserNotificationRequest.builder()
+                    .sender(pm)
+                    .receiver(newEarningTransaction.getExecutor().getUser())
+                    .notification(notification)
+                    .build());
+        }
+    }
 }

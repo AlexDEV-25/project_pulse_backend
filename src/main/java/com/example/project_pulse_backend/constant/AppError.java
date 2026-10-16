@@ -150,7 +150,9 @@ public enum AppError {
     PHASE_NOT_IN_PROGRESS(1139, "Giai đoạn chưa được bắt đầu", HttpStatus.BAD_REQUEST),
     PROJECT_IN_USE(1140, "Không thể xóa dự án đang có thành viên hoặc giai đoạn", HttpStatus.BAD_REQUEST),
     HAS_PHASE_NOT_DONE(1141, "Vẫn còn giai đoạn chưa hoàn thành", HttpStatus.BAD_REQUEST),
-    TASK_IN_USE(1142, "Không thể xóa công việc đã phát sinh ghi chú hoặc chi phí", HttpStatus.BAD_REQUEST);
+    TASK_IN_USE(1142, "Không thể xóa công việc đã phát sinh ghi chú hoặc chi phí", HttpStatus.BAD_REQUEST),
+    NOTIFICATION_NOT_FOUND(1143, "Không tìm thấy thông báo", HttpStatus.BAD_REQUEST),
+    ;
 
     private final int code;
     private final String message;

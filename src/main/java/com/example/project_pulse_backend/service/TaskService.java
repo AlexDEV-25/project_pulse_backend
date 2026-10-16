@@ -54,7 +54,9 @@ public class TaskService {
                 .build();
         task.getAssignments().addAll(taskAssignmentHelper.createAssignments(task, phase.getProject(), request.getAssignments()));
 
-        return toResponse(taskRepo.save(task));
+        Task newTask = taskRepo.save(task);
+        taskHelper.assignTaskNotification(newTask, pm);
+        return toResponse(newTask);
     }
 
     @PreAuthorize("hasAuthority('UPDATE_TASK')")
@@ -75,6 +77,7 @@ public class TaskService {
         if (request.getTaskStatus() == TaskStatus.DONE && task.getTaskStatus() != TaskStatus.IN_PROGRESS) {
             throw AppException.builder().appError(AppError.TASK_NOT_IN_PROGRESS).build();
         }
+        List<TaskAssignment> oldTaskAssignments = new ArrayList<>(task.getAssignments());
 
         task.setTaskName(request.getTaskName());
         task.setDescription(request.getDescription());
@@ -82,15 +85,16 @@ public class TaskService {
         task.setEndAt(request.getEndAt());
         task.setTaskPoint(request.getTaskPoint());
         task.getAssignments().clear();
-        task.getAssignments().addAll(taskAssignmentHelper.createAssignments(
-                task, task.getPhase().getProject(), request.getAssignments()));
+        List<TaskAssignment> newTaskAssignments = taskAssignmentHelper.createAssignments(
+                task, task.getPhase().getProject(), request.getAssignments());
+        task.getAssignments().addAll(newTaskAssignments);
 
         if (request.getTaskStatus() == TaskStatus.DONE && task.getTaskStatus() == TaskStatus.IN_PROGRESS) {
             taskHelper.checkUnconfirmedTaskNotes(task);
             transactionHelper.createCompletionTransactions(task);
         }
         task.setTaskStatus(request.getTaskStatus());
-
+        taskHelper.checkDifferentTaskAssignment(task, pm, oldTaskAssignments, newTaskAssignments);
         return toResponse(taskRepo.save(task));
     }
 

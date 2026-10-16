@@ -56,7 +56,6 @@ public class EarningTransactionService {
         EarningTransaction source = earningTransactionRepo.findByIdForUpdate(request.getSourceTransactionId())
                 .orElseThrow(() -> AppException.builder().appError(AppError.EARNING_TRANSACTION_NOT_FOUND).build());
 
-
         if (!source.getTask().getPhase().getProject().getId().equals(project.getId())
                 || source.getEarningTransactionType() != EarningTransactionType.EARN
                 || source.getExecutor().getUser().getId().equals(request.getTargetEmployeeId())) {
@@ -75,7 +74,10 @@ public class EarningTransactionService {
                 .earningTransactionType(EarningTransactionType.TRANSFER)
                 .reason(request.getReason())
                 .build();
-        return toResponse(earningTransactionRepo.save(transfer));
+        EarningTransaction newTransfer = earningTransactionRepo.save(transfer);
+        earningTransactionHelper.getTransferFormTaskNotification(source, newTransfer);
+        earningTransactionHelper.transferPointFormTaskNotification(source, newTransfer);
+        return toResponse(newTransfer);
     }
 
     private EarningTransactionResponse toResponse(EarningTransaction transaction) {

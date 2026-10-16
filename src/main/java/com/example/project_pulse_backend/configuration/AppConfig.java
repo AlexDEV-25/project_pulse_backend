@@ -54,6 +54,7 @@ public class AppConfig {
         addEarningPermissions(permissions, permissionRepository);
         addAllocationPermissions(permissions, permissionRepository);
         addStatisticsPermissions(permissions, permissionRepository);
+        addNotificationPermissions(permissions, permissionRepository);
         return permissions;
     }
 
@@ -217,6 +218,17 @@ public class AppConfig {
                 "Employee thực hiện: Xem thống kê task cá nhân");
     }
 
+    private void addNotificationPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
+        checkPermissionAndSave(permissions, permissionRepository, "GET_ALL_USER_NOTIFICATION",
+                "Người dùng xem tất cả thông báo của mình");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_UNREAD_USER_NOTIFICATION",
+                "Người dùng xem thông báo chưa đọc của mình");
+        checkPermissionAndSave(permissions, permissionRepository, "READ_NOTIFICATION",
+                "Người dùng đánh dấu thông báo đã đọc");
+        checkPermissionAndSave(permissions, permissionRepository, "READ_ALL_NOTIFICATION",
+                "Người dùng đánh dấu tất cả thông báo đã đọc");
+    }
+
     private void rolesSave(RoleRepo roleRepository, List<Permission> permissions) {
         checkRoleAndSave(roleRepository, "ADMIN", "quản trị viên",
                 findPermissionsByNames(permissions,
@@ -232,7 +244,9 @@ public class AppConfig {
                         "GET_ALLOCATIONS_BY_ID",
                         "GET_STATISTICS_SUMMARY", "GET_PROJECT_STATUS_STATISTICS",
                         "GET_PROJECT_OVERVIEW_STATISTICS", "GET_PROJECT_EV_AC_STATISTICS",
-                        "GET_IN_PROGRESS_PROJECT_STATISTICS"));
+                        "GET_IN_PROGRESS_PROJECT_STATISTICS",
+                        "GET_ALL_USER_NOTIFICATION", "GET_UNREAD_USER_NOTIFICATION",
+                        "READ_NOTIFICATION", "READ_ALL_NOTIFICATION"));
         checkRoleAndSave(roleRepository, "PM", "quản lý dự án",
                 findPermissionsByNames(permissions,
                         "CHANGE_PASSWORD", "GET_USERS", "GET_USER_BY_ID", "GET_MY_INFO", "UPDATE_AVATAR",
@@ -247,7 +261,9 @@ public class AppConfig {
                         "CREATE_ALLOCATION", "UPDATE_ALLOCATION", "DELETE_ALLOCATION",
                         "GET_STATISTICS_SUMMARY", "GET_PROJECT_STATUS_STATISTICS",
                         "GET_PROJECT_OVERVIEW_STATISTICS", "GET_PROJECT_EV_AC_STATISTICS",
-                        "GET_IN_PROGRESS_PROJECT_STATISTICS"));
+                        "GET_IN_PROGRESS_PROJECT_STATISTICS",
+                        "GET_ALL_USER_NOTIFICATION", "GET_UNREAD_USER_NOTIFICATION",
+                        "READ_NOTIFICATION", "READ_ALL_NOTIFICATION"));
         checkRoleAndSave(roleRepository, "EMPLOYEE", "nhân viên",
                 findPermissionsByNames(permissions,
                         "CHANGE_PASSWORD", "GET_MY_INFO", "UPDATE_AVATAR",
@@ -258,7 +274,9 @@ public class AppConfig {
                         "GET_TASK_COSTS_BY_PROJECT", "GET_TASK_COSTS_BY_ID", "GET_EARNINGS_BY_PROJECT",
                         "GET_EARNINGS_BY_ID", "GET_EMPLOYEE_STATISTICS_SUMMARY",
                         "GET_EMPLOYEE_PROJECT_POINT_STATISTICS", "GET_EMPLOYEE_TASK_STATISTICS",
-                        "GET_PROJECTS", "GET_PROJECT_BY_ID", "GET_TASK_BY_ID"));
+                        "GET_PROJECTS", "GET_PROJECT_BY_ID", "GET_TASK_BY_ID",
+                        "GET_ALL_USER_NOTIFICATION", "GET_UNREAD_USER_NOTIFICATION",
+                        "READ_NOTIFICATION", "READ_ALL_NOTIFICATION"));
     }
 
     private List<Permission> findPermissionsByNames(List<Permission> permissions, String... names) {

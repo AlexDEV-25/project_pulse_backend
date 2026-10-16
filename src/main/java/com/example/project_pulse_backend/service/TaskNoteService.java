@@ -56,7 +56,9 @@ public class TaskNoteService {
                 .createdAt(LocalDate.now())
                 .taskNoteStatus(TaskNoteStatus.PENDING_CONFIRMATION)
                 .build();
-        return toResponse(taskNoteRepo.save(taskNote));
+        TaskNote newTaskNote = taskNoteRepo.save(taskNote);
+        taskNoteHelper.createTaskNoteNotification(newTaskNote, user);
+        return toResponse(newTaskNote);
     }
 
     @PreAuthorize("hasAuthority('UPDATE_TASK_NOTE')")
