@@ -22,6 +22,5 @@ public class CreateUserNotificationRequest {
 
     @NotNull(message = "NOTIFICATION_REQUIRED")
     private Notification notification;
-
-
+    
 }

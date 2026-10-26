@@ -14,11 +14,7 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
 
     List<UserNotification> findByReceiver_IdAndReadFalseOrderByCreatedAtDescIdDesc(Long receiverId);
 
-    Optional<UserNotification> findByIdAndReceiver_IdAndReadFalse(Long Id, Long receiverId);
-
     Optional<UserNotification> findByIdAndReceiver_Id(Long id, Long receiverId);
-
-    List<UserNotification> findByReceiver_Id(Long receiverId);
 
     List<UserNotification> findByReceiver_IdOrderByCreatedAtDescIdDesc(Long receiverId);
 }

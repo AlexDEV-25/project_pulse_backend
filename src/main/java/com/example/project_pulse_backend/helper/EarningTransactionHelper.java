@@ -124,10 +124,4 @@ public class EarningTransactionHelper {
                     .build());
         }
     }
-
-    public void transferPointFormTaskNotification(EarningTransaction newTransfer) {
-        if (newTransfer != null && newTransfer.getReferenceTransaction() != null) {
-            transferPointFormTaskNotification(newTransfer.getReferenceTransaction(), newTransfer);
-        }
-    }
 }

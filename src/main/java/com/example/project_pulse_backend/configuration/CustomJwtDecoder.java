@@ -1,7 +1,9 @@
 package com.example.project_pulse_backend.configuration;
 
 
+import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.dto.response.IntrospectResponse;
+import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.JwtHelper;
 import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,7 @@ public class CustomJwtDecoder implements JwtDecoder {
         try {
             IntrospectResponse response = jwtHelper.introspect(token);
             if (!response.isValid())
-                throw new JwtException("Token invalid");
+                throw new AppException(AppError.INVALID_TOKEN);
         } catch (JOSEException | ParseException e) {
             throw new JwtException(e.getMessage());
         }

@@ -1,7 +1,9 @@
 package com.example.project_pulse_backend.dto.request;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -9,10 +11,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmailRequest {
-    Sender sender;
-    List<Recipient> to;
-    String subject;
-    String htmlContent;
+    private Sender sender;
+    private List<Recipient> to;
+    private String subject;
+    private String htmlContent;
 }
