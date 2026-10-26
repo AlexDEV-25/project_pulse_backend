@@ -9,6 +9,7 @@ import com.example.project_pulse_backend.entity.Auth;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.*;
+import com.example.project_pulse_backend.mapper.AuthMapper;
 import com.example.project_pulse_backend.repository.AuthRepo;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
@@ -31,6 +32,7 @@ public class AuthService {
     private final JwtHelper jwtHelper;
     private final EmailHelper emailHelper;
     private final UserHelper userHelper;
+    private final AuthMapper authMapper;
 
     @PreAuthorize("hasAuthority('CREATE_ACCOUNT')")
     @Transactional
@@ -41,20 +43,13 @@ public class AuthService {
 
         User newUser = userHelper.createUser(request);
 
-        Auth authentication = Auth.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .user(newUser)
-                .build();
+        Auth authentication = authMapper.toAuth(request);
+        authentication.setPassword(passwordEncoder.encode(request.getPassword()));
+        authentication.setUser(newUser);
 
         Auth newAuth = authenticationRepo.save(authentication);
 
-        return CreateAccountResponse.builder()
-                .email(newAuth.getEmail())
-                .userName(newAuth.getUser().getUserName())
-                .position(newAuth.getUser().getPosition())
-                .resourceRate(newAuth.getUser().getResourceRate())
-                .build();
+        return authMapper.toCreateAccountResponse(newAuth);
     }
 
     public AuthResponse login(AuthRequest request) {

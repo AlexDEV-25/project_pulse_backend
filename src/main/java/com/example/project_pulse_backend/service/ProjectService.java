@@ -12,6 +12,7 @@ import com.example.project_pulse_backend.helper.GetUserByToken;
 import com.example.project_pulse_backend.helper.ProjectHelper;
 import com.example.project_pulse_backend.helper.RoleHelper;
 import com.example.project_pulse_backend.helper.TimeHelper;
+import com.example.project_pulse_backend.mapper.ProjectMapper;
 import com.example.project_pulse_backend.repository.ProjectMemberRepo;
 import com.example.project_pulse_backend.repository.ProjectRepo;
 import com.example.project_pulse_backend.repository.UserRepo;
@@ -31,6 +32,7 @@ public class ProjectService {
     private final UserRepo userRepo;
     private final GetUserByToken getUserByToken;
     private final ProjectHelper projectHelper;
+    private final ProjectMapper projectMapper;
 
     @PreAuthorize("hasAuthority('CREATE_PROJECT')")
     @Transactional
@@ -43,16 +45,10 @@ public class ProjectService {
         }
         TimeHelper.checkStartBeforeEnd(request.getStartAt(), request.getEndAt());
 
-        Project newProject = projectRepo.save(Project.builder()
-                .projectName(request.getProjectName())
-                .pm(pm)
-                .startAt(request.getStartAt())
-                .endAt(request.getEndAt())
-                .clientBudget(request.getClientBudget())
-                .projectBudget(request.getProjectBudget())
-                .description(request.getDescription())
-                .projectStatus(ProjectStatus.DRAFT)
-                .build());
+        Project project = projectMapper.toProject(request);
+        project.setPm(pm);
+        project.setProjectStatus(ProjectStatus.DRAFT);
+        Project newProject = projectRepo.save(project);
 
         return toResponseForAdmin(newProject);
     }
@@ -71,13 +67,8 @@ public class ProjectService {
         }
         TimeHelper.checkStartBeforeEnd(request.getStartAt(), request.getEndAt());
 
-        entity.setProjectName(request.getProjectName());
+        projectMapper.updateProject(request, entity);
         entity.setPm(pm);
-        entity.setStartAt(request.getStartAt());
-        entity.setEndAt(request.getEndAt());
-        entity.setClientBudget(request.getClientBudget());
-        entity.setProjectBudget(request.getProjectBudget());
-        entity.setDescription(request.getDescription());
 
         if (request.getProjectStatus() == ProjectStatus.DONE) {
             projectHelper.checkInProgressPhases(entity);
@@ -141,45 +132,14 @@ public class ProjectService {
     }
 
     private ProjectResponse toResponseForAdmin(Project project) {
-        return ProjectResponse.builder()
-                .id(project.getId())
-                .projectName(project.getProjectName())
-                .pmId(project.getPm() != null ? project.getPm().getId() : null)
-                .pmName(project.getPm() != null ? project.getPm().getUserName() : null)
-                .startAt(project.getStartAt())
-                .endAt(project.getEndAt())
-                .clientBudget(project.getClientBudget())
-                .projectBudget(project.getProjectBudget())
-                .description(project.getDescription())
-                .projectStatus(project.getProjectStatus())
-                .build();
+        return projectMapper.toProjectResponse(project);
     }
 
     private ProjectResponse toResponseForPm(Project project) {
-        return ProjectResponse.builder()
-                .id(project.getId())
-                .projectName(project.getProjectName())
-                .pmId(project.getPm() != null ? project.getPm().getId() : null)
-                .pmName(project.getPm() != null ? project.getPm().getUserName() : null)
-                .startAt(project.getStartAt())
-                .endAt(project.getEndAt())
-                .clientBudget(null)
-                .projectBudget(project.getProjectBudget())
-                .description(project.getDescription())
-                .projectStatus(project.getProjectStatus())
-                .build();
+        return projectMapper.toProjectResponseForPm(project);
     }
 
     private ProjectResponse toResponseForEmployee(Project project) {
-        return ProjectResponse.builder()
-                .id(project.getId())
-                .projectName(project.getProjectName())
-                .pmId(project.getPm() != null ? project.getPm().getId() : null)
-                .pmName(project.getPm() != null ? project.getPm().getUserName() : null)
-                .startAt(project.getStartAt())
-                .endAt(project.getEndAt())
-                .description(project.getDescription())
-                .projectStatus(project.getProjectStatus())
-                .build();
+        return projectMapper.toProjectResponseForEmployee(project);
     }
 }

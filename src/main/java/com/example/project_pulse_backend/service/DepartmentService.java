@@ -8,6 +8,7 @@ import com.example.project_pulse_backend.dto.response.DepartmentStatisticsRespon
 import com.example.project_pulse_backend.entity.Department;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.UserHelper;
+import com.example.project_pulse_backend.mapper.DepartmentMapper;
 import com.example.project_pulse_backend.repository.DepartmentRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,11 +23,12 @@ import java.util.List;
 public class DepartmentService {
     private final DepartmentRepo departmentRepo;
     private final UserHelper userHelper;
+    private final DepartmentMapper departmentMapper;
 
     @PreAuthorize("hasAuthority('CREATE_DEPARTMENT')")
     @Transactional
     public DepartmentResponse createDepartment(CreateDepartmentRequest request) {
-        Department newDepartment = departmentRepo.save(Department.builder().departmentName(request.getDepartmentName()).hidden(false).build());
+        Department newDepartment = departmentRepo.save(departmentMapper.toDepartment(request));
         return toResponse(newDepartment);
     }
 
@@ -36,8 +38,7 @@ public class DepartmentService {
         Department entity = departmentRepo.findById(id).orElseThrow(
                 () -> AppException.builder().appError(AppError.DEPARTMENT_NOT_FOUND).build());
 
-        entity.setDepartmentName(request.getDepartmentName());
-        entity.setHidden(request.isHidden());
+        departmentMapper.updateDepartment(request, entity);
 
         Department result = departmentRepo.save(entity);
         return toResponse(result);
@@ -71,11 +72,7 @@ public class DepartmentService {
     }
 
     private DepartmentResponse toResponse(Department department) {
-        return DepartmentResponse.builder()
-                .id(department.getId())
-                .departmentName(department.getDepartmentName())
-                .hidden(department.isHidden())
-                .employeeCount(userHelper.getUserCountByDepartment(department.getId()))
-                .build();
+        return departmentMapper.toDepartmentResponse(
+                department, userHelper.getUserCountByDepartment(department.getId()));
     }
 }

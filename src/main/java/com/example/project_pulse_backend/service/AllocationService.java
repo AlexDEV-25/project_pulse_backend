@@ -4,7 +4,6 @@ import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.dto.request.CreateAllocationRequest;
 import com.example.project_pulse_backend.dto.request.UpdateAllocationRequest;
 import com.example.project_pulse_backend.dto.response.AllocationResponse;
-import com.example.project_pulse_backend.dto.response.OverloadedDateResponse;
 import com.example.project_pulse_backend.entity.Allocation;
 import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.ProjectMember;
@@ -14,6 +13,7 @@ import com.example.project_pulse_backend.helper.AllocationHelper;
 import com.example.project_pulse_backend.helper.GetUserByToken;
 import com.example.project_pulse_backend.helper.PhaseHelper;
 import com.example.project_pulse_backend.helper.ProjectMemberHelper;
+import com.example.project_pulse_backend.mapper.AllocationMapper;
 import com.example.project_pulse_backend.repository.AllocationRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +32,7 @@ public class AllocationService {
     private final PhaseHelper phaseHelper;
     private final ProjectMemberHelper projectMemberHelper;
     private final AllocationHelper allocationHelper;
+    private final AllocationMapper allocationMapper;
 
     @PreAuthorize("hasAuthority('CREATE_ALLOCATION')")
     @Transactional
@@ -50,12 +51,10 @@ public class AllocationService {
         BigDecimal resourceRate = member.getUser().getResourceRate() != null
                 ? member.getUser().getResourceRate() : BigDecimal.ZERO;
 
-        Allocation allocation = Allocation.builder()
-                .phase(phase)
-                .member(member)
-                .allocationPercentage(request.getAllocationPercentage())
-                .resourceRateSnapshot(resourceRate)
-                .build();
+        Allocation allocation = allocationMapper.toAllocation(request);
+        allocation.setPhase(phase);
+        allocation.setMember(member);
+        allocation.setResourceRateSnapshot(resourceRate);
 
         Allocation saved = allocationRepo.save(allocation);
         allocationHelper.recalculateForUser(userId);
@@ -73,7 +72,7 @@ public class AllocationService {
         Phase phase = allocation.getPhase();
         allocationHelper.checkDone(phase);
 
-        allocation.setAllocationPercentage(request.getAllocationPercentage());
+        allocationMapper.updateAllocation(request, allocation);
 
         Allocation saved = allocationRepo.save(allocation);
         allocationHelper.recalculateForUser(userId);
@@ -106,30 +105,9 @@ public class AllocationService {
     }
 
     private AllocationResponse toResponse(Allocation allocation) {
-        return AllocationResponse.builder()
-                .id(allocation.getId())
-                .projectId(allocation.getPhase() != null ? allocation.getPhase().getProject().getId() : null)
-                .projectName(allocation.getPhase() != null ? allocation.getPhase().getProject().getProjectName()
-                        : null)
-                .phaseId(allocation.getPhase() != null ? allocation.getPhase().getId() : null)
-                .phaseName(allocation.getPhase() != null ? allocation.getPhase().getPhaseName() : null)
-                .memberId(allocation.getMember() != null ? allocation.getMember().getId() : null)
-                .userId(allocation.getMember() != null && allocation.getMember().getUser() != null
-                        ? allocation.getMember().getUser().getId() : null)
-                .userName(allocation.getMember() != null && allocation.getMember().getUser() != null
-                        ? allocation.getMember().getUser().getUserName() : null)
-                .allocationPercentage(allocation.getAllocationPercentage())
-                .resourceRateSnapshot(allocation.getResourceRateSnapshot())
-                .allocationPoint(allocationHelper.calculateAllocationPoint(allocation))
-                .overloadedDates(allocation.getOverloadedDates() == null
-                        ? List.of()
-                        : allocation.getOverloadedDates().stream()
-                          .map(date -> OverloadedDateResponse.builder()
-                                       .date(date.getDate())
-                                       .totalAllocationPercentage(date.getTotalAllocationPercentage())
-                                       .build())
-                          .toList())
-                .build();
+        AllocationResponse response = allocationMapper.toAllocationResponse(allocation);
+        response.setAllocationPoint(allocationHelper.calculateAllocationPoint(allocation));
+        return response;
     }
 
 }

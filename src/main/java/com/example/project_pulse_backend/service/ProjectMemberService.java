@@ -10,6 +10,7 @@ import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.GetUserByToken;
 import com.example.project_pulse_backend.helper.ProjectHelper;
 import com.example.project_pulse_backend.helper.ProjectMemberHelper;
+import com.example.project_pulse_backend.mapper.ProjectMemberMapper;
 import com.example.project_pulse_backend.repository.ProjectMemberRepo;
 import com.example.project_pulse_backend.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class ProjectMemberService {
     private final UserRepo userRepo;
     private final GetUserByToken getUserByToken;
     private final ProjectMemberHelper projectMemberHelper;
+    private final ProjectMemberMapper projectMemberMapper;
 
     @PreAuthorize("hasAuthority('GET_PROJECT_MEMBERS_BY_PROJECT')")
     public List<ProjectMemberResponse> getMyProjectMembers(Long projectId, String keyword) {
@@ -57,8 +59,10 @@ public class ProjectMemberService {
             throw AppException.builder().appError(AppError.PROJECT_MEMBER_ALREADY_EXISTS).build();
         }
 
-        ProjectMember newProjectMember = projectMemberRepo.save(ProjectMember.builder()
-                .project(project).user(member).build());
+        ProjectMember projectMember = projectMemberMapper.toProjectMember(request);
+        projectMember.setProject(project);
+        projectMember.setUser(member);
+        ProjectMember newProjectMember = projectMemberRepo.save(projectMember);
 
         return toResponse(newProjectMember);
     }
@@ -74,14 +78,6 @@ public class ProjectMemberService {
     }
 
     private ProjectMemberResponse toResponse(ProjectMember projectMember) {
-        return ProjectMemberResponse.builder()
-                .id(projectMember.getId())
-                .projectId(projectMember.getProject() != null ? projectMember.getProject().getId() : null)
-                .projectName(projectMember.getProject() != null ? projectMember.getProject().getProjectName() : null)
-                .userId(projectMember.getUser() != null ? projectMember.getUser().getId() : null)
-                .userName(projectMember.getUser() != null ? projectMember.getUser().getUserName() : null)
-                .userResourceRate(projectMember.getUser() != null ? projectMember.getUser().getResourceRate() : null)
-                .userPosition(projectMember.getUser() != null ? projectMember.getUser().getPosition() : null)
-                .build();
+        return projectMemberMapper.toProjectMemberResponse(projectMember);
     }
 }

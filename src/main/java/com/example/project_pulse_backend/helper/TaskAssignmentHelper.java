@@ -7,6 +7,7 @@ import com.example.project_pulse_backend.entity.ProjectMember;
 import com.example.project_pulse_backend.entity.Task;
 import com.example.project_pulse_backend.entity.TaskAssignment;
 import com.example.project_pulse_backend.exception.AppException;
+import com.example.project_pulse_backend.mapper.TaskAssignmentMapper;
 import com.example.project_pulse_backend.repository.ProjectMemberRepo;
 import com.example.project_pulse_backend.repository.TaskAssignmentRepo;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class TaskAssignmentHelper {
 
     private final ProjectMemberRepo projectMemberRepo;
     private final TaskAssignmentRepo taskAssignmentRepo;
+    private final TaskAssignmentMapper taskAssignmentMapper;
 
     public List<TaskAssignment> createAssignments(
             Task task, Project project, List<TaskAssignmentRequest> requests) {
@@ -37,11 +39,10 @@ public class TaskAssignmentHelper {
                             project.getId(), request.getEmployeeId())
                     .orElseThrow(() -> AppException.builder().appError(AppError.MEMBER_NOT_FOUND).build());
 
-            assignments.add(TaskAssignment.builder()
-                    .task(task)
-                    .employee(member)
-                    .contributionPercentage(request.getContributionPercentage())
-                    .build());
+            TaskAssignment assignment = taskAssignmentMapper.toTaskAssignment(request);
+            assignment.setTask(task);
+            assignment.setEmployee(member);
+            assignments.add(assignment);
         }
         return assignments;
     }

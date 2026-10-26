@@ -10,6 +10,7 @@ import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.helper.*;
+import com.example.project_pulse_backend.mapper.PhaseMapper;
 import com.example.project_pulse_backend.repository.AllocationRepo;
 import com.example.project_pulse_backend.repository.PhaseRepo;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class PhaseService {
     private final ProjectHelper projectHelper;
     private final EvmHelper evmHelper;
     private final AllocationRepo allocationRepo;
+    private final PhaseMapper phaseMapper;
 
     @PreAuthorize("hasAuthority('CREATE_PHASE')")
     @Transactional
@@ -44,15 +46,12 @@ public class PhaseService {
         List<LocalDate> offDates = phaseHelper.normalizeDates(request.getOffDates());
         phaseHelper.checkSpecialDates(request.getStartAt(), request.getEndAt(), makeUpDates, offDates);
 
-        Phase newPhase = phaseRepo.save(Phase.builder()
-                .project(project)
-                .startAt(request.getStartAt())
-                .endAt(request.getEndAt())
-                .phaseName(request.getPhaseName())
-                .makeUpDates(makeUpDates)
-                .offDates(offDates)
-                .status(PhaseStatus.PLANNED)
-                .build());
+        Phase phase = phaseMapper.toPhase(request);
+        phase.setProject(project);
+        phase.setMakeUpDates(makeUpDates);
+        phase.setOffDates(offDates);
+        phase.setStatus(PhaseStatus.PLANNED);
+        Phase newPhase = phaseRepo.save(phase);
 
         return toResponse(newPhase);
     }
@@ -71,9 +70,7 @@ public class PhaseService {
         List<LocalDate> offDates = phaseHelper.normalizeDates(request.getOffDates());
         phaseHelper.checkSpecialDates(request.getStartAt(), request.getEndAt(), makeUpDates, offDates);
 
-        entity.setStartAt(request.getStartAt());
-        entity.setEndAt(request.getEndAt());
-        entity.setPhaseName(request.getPhaseName());
+        phaseMapper.updatePhase(request, entity);
         entity.setMakeUpDates(makeUpDates);
         entity.setOffDates(offDates);
 
@@ -118,20 +115,11 @@ public class PhaseService {
     }
 
     private PhaseResponse toResponse(Phase phase) {
-        return PhaseResponse.builder()
-                .id(phase.getId())
-                .projectId(phase.getProject() != null ? phase.getProject().getId() : null)
-                .projectName(phase.getProject() != null ? phase.getProject().getProjectName() : null)
-                .startAt(phase.getStartAt())
-                .endAt(phase.getEndAt())
-                .phaseName(phase.getPhaseName())
-                .makeUpDates(phase.getMakeUpDates() == null ? List.of() : phase.getMakeUpDates())
-                .offDates(phase.getOffDates() == null ? List.of() : phase.getOffDates())
-                .workdays(TimeHelper.workingDates(
-                        phase.getStartAt(), phase.getEndAt(), phase.getMakeUpDates(), phase.getOffDates()).size())
-                .status(phase.getStatus())
-                .progress(phaseHelper.calculateProgress(phase.getId()))
-                .build();
+        PhaseResponse response = phaseMapper.toPhaseResponse(phase);
+        response.setWorkdays(TimeHelper.workingDates(
+                phase.getStartAt(), phase.getEndAt(), phase.getMakeUpDates(), phase.getOffDates()).size());
+        response.setProgress(phaseHelper.calculateProgress(phase.getId()));
+        return response;
     }
 
     private void updateAllocation(Long id) {

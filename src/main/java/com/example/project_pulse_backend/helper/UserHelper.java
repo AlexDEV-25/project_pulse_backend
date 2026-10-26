@@ -6,6 +6,7 @@ import com.example.project_pulse_backend.entity.Department;
 import com.example.project_pulse_backend.entity.Role;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
+import com.example.project_pulse_backend.mapper.UserMapper;
 import com.example.project_pulse_backend.repository.DepartmentRepo;
 import com.example.project_pulse_backend.repository.RoleRepo;
 import com.example.project_pulse_backend.repository.UserRepo;
@@ -20,6 +21,7 @@ public class UserHelper {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
     private final DepartmentRepo departmentRepo;
+    private final UserMapper userMapper;
 
     public User createUser(CreateAccountRequest request) {
 
@@ -27,13 +29,9 @@ public class UserHelper {
         Department department = departmentRepo.findById(request.getDepartmentId())
                 .orElseThrow(() -> AppException.builder().appError(AppError.DEPARTMENT_NOT_FOUND).build());
 
-        User newUser = User.builder()
-                .userName(request.getUserName())
-                .roles(roles)
-                .position(request.getPosition())
-                .resourceRate(request.getResourceRate())
-                .department(department)
-                .build();
+        User newUser = userMapper.toUser(request);
+        newUser.setRoles(roles);
+        newUser.setDepartment(department);
         return userRepo.save(newUser);
     }
 

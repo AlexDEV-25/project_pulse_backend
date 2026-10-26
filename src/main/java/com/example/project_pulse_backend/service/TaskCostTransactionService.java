@@ -1,11 +1,11 @@
 package com.example.project_pulse_backend.service;
 
 import com.example.project_pulse_backend.dto.response.TaskCostTransactionResponse;
-import com.example.project_pulse_backend.entity.Task;
 import com.example.project_pulse_backend.entity.TaskCostTransaction;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.helper.GetUserByToken;
 import com.example.project_pulse_backend.helper.TaskCostTransactionHelper;
+import com.example.project_pulse_backend.mapper.TaskCostTransactionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -19,6 +19,7 @@ import java.util.List;
 public class TaskCostTransactionService {
     private final GetUserByToken getUserByToken;
     private final TaskCostTransactionHelper taskCostTransactionHelper;
+    private final TaskCostTransactionMapper taskCostTransactionMapper;
 
     @PreAuthorize("hasAuthority('GET_TASK_COSTS_BY_PROJECT')")
     public List<TaskCostTransactionResponse> getByProject(Long projectId, String keyword, Long phaseId) {
@@ -37,20 +38,6 @@ public class TaskCostTransactionService {
 
 
     private TaskCostTransactionResponse toResponse(TaskCostTransaction transaction) {
-        Task task = transaction.getTask();
-        User employee = transaction.getExecutor().getUser();
-        return TaskCostTransactionResponse.builder()
-                .id(transaction.getId())
-                .projectId(task.getPhase().getProject().getId())
-                .phaseId(task.getPhase().getId())
-                .phaseName(task.getPhase().getPhaseName())
-                .taskId(task.getId())
-                .taskName(task.getTaskName())
-                .employeeId(employee.getId())
-                .employeeName(employee.getUserName())
-                .points(transaction.getPoints())
-                .workdays(transaction.getWorkdays())
-                .reason(transaction.getReason())
-                .build();
+        return taskCostTransactionMapper.toTaskCostTransactionResponse(transaction);
     }
 }

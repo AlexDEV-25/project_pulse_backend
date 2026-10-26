@@ -5,11 +5,11 @@ import com.example.project_pulse_backend.constant.TaskStatus;
 import com.example.project_pulse_backend.dto.request.CreateTaskRequest;
 import com.example.project_pulse_backend.dto.request.UpdateTaskRequest;
 import com.example.project_pulse_backend.dto.request.UpdateTaskStatusRequest;
-import com.example.project_pulse_backend.dto.response.TaskAssignmentResponse;
 import com.example.project_pulse_backend.dto.response.TaskResponse;
 import com.example.project_pulse_backend.entity.*;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.*;
+import com.example.project_pulse_backend.mapper.TaskMapper;
 import com.example.project_pulse_backend.repository.TaskRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +32,7 @@ public class TaskService {
     private final TaskAssignmentHelper taskAssignmentHelper;
     private final GetUserByToken getUserByToken;
     private final ProjectMemberHelper projectMemberHelper;
+    private final TaskMapper taskMapper;
 
     @PreAuthorize("hasAuthority('CREATE_TASK')")
     @Transactional
@@ -42,16 +43,10 @@ public class TaskService {
         taskHelper.checkDone(phase);
         taskHelper.checkTime(phase, request.getStartAt(), request.getEndAt());
 
-        Task task = Task.builder()
-                .phase(phase)
-                .taskName(request.getTaskName())
-                .description(request.getDescription())
-                .startAt(request.getStartAt())
-                .endAt(request.getEndAt())
-                .taskStatus(TaskStatus.TODO)
-                .taskPoint(request.getTaskPoint())
-                .assignments(new ArrayList<>())
-                .build();
+        Task task = taskMapper.toTask(request);
+        task.setPhase(phase);
+        task.setTaskStatus(TaskStatus.TODO);
+        task.setAssignments(new ArrayList<>());
         task.getAssignments().addAll(taskAssignmentHelper.createAssignments(task, phase.getProject(), request.getAssignments()));
 
         Task newTask = taskRepo.save(task);
@@ -79,11 +74,7 @@ public class TaskService {
         }
         List<TaskAssignment> oldTaskAssignments = new ArrayList<>(task.getAssignments());
 
-        task.setTaskName(request.getTaskName());
-        task.setDescription(request.getDescription());
-        task.setStartAt(request.getStartAt());
-        task.setEndAt(request.getEndAt());
-        task.setTaskPoint(request.getTaskPoint());
+        taskMapper.updateTask(request, task);
         task.getAssignments().clear();
         List<TaskAssignment> newTaskAssignments = taskAssignmentHelper.createAssignments(
                 task, task.getPhase().getProject(), request.getAssignments());
@@ -141,35 +132,11 @@ public class TaskService {
     }
 
     private TaskResponse toResponse(Task task) {
-        return TaskResponse.builder()
-                .id(task.getId())
-                .projectId(task.getPhase().getProject().getId())
-                .projectName(task.getPhase().getProject().getProjectName())
-                .phaseId(task.getPhase().getId())
-                .phaseName(task.getPhase().getPhaseName())
-                .taskName(task.getTaskName())
-                .description(task.getDescription())
-                .startAt(task.getStartAt())
-                .endAt(task.getEndAt())
-                .taskStatus(task.getTaskStatus())
-                .taskPoint(task.getTaskPoint())
-                .progress(task.getAssignments().stream()
-                        .mapToInt(TaskAssignment::getContributionPercentage)
-                        .sum())
-                .assignments(task.getAssignments().stream()
-                        .map(this::toAssignmentResponse)
-                        .toList())
-                .build();
-    }
-
-    private TaskAssignmentResponse toAssignmentResponse(TaskAssignment assignment) {
-        ProjectMember member = assignment.getEmployee();
-        return TaskAssignmentResponse.builder()
-                .id(assignment.getId())
-                .employeeId(member.getUser().getId())
-                .employeeName(member.getUser().getUserName())
-                .contributionPercentage(assignment.getContributionPercentage())
-                .build();
+        TaskResponse response = taskMapper.toTaskResponse(task);
+        response.setProgress(task.getAssignments().stream()
+                .mapToInt(TaskAssignment::getContributionPercentage)
+                .sum());
+        return response;
     }
 
 }

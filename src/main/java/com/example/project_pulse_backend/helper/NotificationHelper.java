@@ -4,6 +4,7 @@ import com.example.project_pulse_backend.dto.request.CreateUserNotificationReque
 import com.example.project_pulse_backend.dto.request.NotificationRequest;
 import com.example.project_pulse_backend.entity.Notification;
 import com.example.project_pulse_backend.entity.UserNotification;
+import com.example.project_pulse_backend.mapper.NotificationMapper;
 import com.example.project_pulse_backend.repository.NotificationRepository;
 import com.example.project_pulse_backend.repository.UserNotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,28 +17,20 @@ import java.time.LocalDateTime;
 public class NotificationHelper {
     private final NotificationRepository notificationRepository;
     private final UserNotificationRepository userNotificationRepository;
+    private final NotificationMapper notificationMapper;
 
     public Notification createNotification(NotificationRequest request) {
 
-        Notification notification = Notification.builder()
-                .content(request.getContent())
-                .link(request.getLink())
-                .type(request.getType())
-                .build();
+        Notification notification = notificationMapper.toNotification(request);
 
         return notificationRepository.save(notification);
     }
-
-
+    
     public void createUserNotification(CreateUserNotificationRequest request) {
 
-        UserNotification notification = UserNotification.builder()
-                .sender(request.getSender())
-                .receiver(request.getReceiver())
-                .notification(request.getNotification())
-                .createdAt(LocalDateTime.now())
-                .read(false)
-                .build();
+        UserNotification notification = notificationMapper.toUserNotification(request);
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setRead(false);
         userNotificationRepository.save(notification);
     }
 

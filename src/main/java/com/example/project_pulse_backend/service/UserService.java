@@ -2,7 +2,6 @@ package com.example.project_pulse_backend.service;
 
 import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.dto.request.UpdateUserRequest;
-import com.example.project_pulse_backend.dto.response.RoleResponse;
 import com.example.project_pulse_backend.dto.response.UserResponse;
 import com.example.project_pulse_backend.dto.response.UserStatisticsResponse;
 import com.example.project_pulse_backend.entity.Department;
@@ -13,6 +12,7 @@ import com.example.project_pulse_backend.helper.FileManager;
 import com.example.project_pulse_backend.helper.GetUserByToken;
 import com.example.project_pulse_backend.helper.RoleHelper;
 import com.example.project_pulse_backend.helper.UserHelper;
+import com.example.project_pulse_backend.mapper.UserMapper;
 import com.example.project_pulse_backend.repository.AuthRepo;
 import com.example.project_pulse_backend.repository.DepartmentRepo;
 import com.example.project_pulse_backend.repository.UserRepo;
@@ -37,6 +37,7 @@ public class UserService {
     private final GetUserByToken getUserByToken;
     private final FileManager fileStorage;
     private final UserHelper userHelper;
+    private final UserMapper userMapper;
 
     @PreAuthorize("hasAuthority('GET_USERS')")
     @Transactional(readOnly = true)
@@ -149,9 +150,7 @@ public class UserService {
         List<Role> roles = userHelper.findRoles(request.getRoles());
         Department department = departmentRepo.findById(request.getDepartmentId())
                 .orElseThrow(() -> AppException.builder().appError(AppError.DEPARTMENT_NOT_FOUND).build());
-        entity.setUserName(request.getUserName());
-        entity.setPosition(request.getPosition());
-        entity.setResourceRate(request.getResourceRate());
+        userMapper.updateUser(request, entity);
         entity.setRoles(roles);
         entity.setDepartment(department);
 
@@ -161,31 +160,11 @@ public class UserService {
 
     private UserResponse toResponse(User user) {
         var auth = authRepo.findByUser_Id(user.getId()).orElse(null);
-        return UserResponse.builder()
-                .id(user.getId())
-                .authId(auth == null ? null : auth.getId())
-                .email(auth == null ? null : auth.getEmail())
-                .userName(user.getUserName())
-                .position(user.getPosition())
-                .resourceRate(user.getResourceRate())
-                .roles(user.getRoles().stream().map(role -> RoleResponse.builder().name(role.getName()).build()).toList())
-                .departmentId(user.getDepartment().getId())
-                .departmentName(user.getDepartment().getDepartmentName())
-                .avatarUrl(user.getAvatarUrl())
-                .build();
+        return userMapper.toUserResponse(user, auth);
     }
 
     private UserResponse toResponseForPm(User user) {
         var auth = authRepo.findByUser_Id(user.getId()).orElse(null);
-        return UserResponse.builder()
-                .id(user.getId())
-                .email(auth == null ? null : auth.getEmail())
-                .userName(user.getUserName())
-                .position(user.getPosition())
-                .resourceRate(user.getResourceRate())
-                .departmentId(user.getDepartment().getId())
-                .departmentName(user.getDepartment().getDepartmentName())
-                .avatarUrl(user.getAvatarUrl())
-                .build();
+        return userMapper.toUserResponseForPm(user, auth);
     }
 }

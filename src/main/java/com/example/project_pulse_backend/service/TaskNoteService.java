@@ -12,6 +12,7 @@ import com.example.project_pulse_backend.entity.TaskNote;
 import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.*;
+import com.example.project_pulse_backend.mapper.TaskNoteMapper;
 import com.example.project_pulse_backend.repository.TaskNoteRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +33,7 @@ public class TaskNoteService {
     private final TaskNoteHelper taskNoteHelper;
     private final ProjectHelper projectHelper;
     private final ProjectMemberHelper projectMemberHelper;
+    private final TaskNoteMapper taskNoteMapper;
 
     @PreAuthorize("hasAuthority('CREATE_TASK_NOTE')")
     @Transactional
@@ -46,14 +48,11 @@ public class TaskNoteService {
 
         TimeHelper.checkWorkingDateInTask(request.getWorkingDate(), task.getStartAt(), task.getEndAt());
 
-        TaskNote taskNote = TaskNote.builder()
-                .task(task).author(author)
-                .content(request.getContent())
-                .workingHours(request.getWorkingHours())
-                .workingDate(request.getWorkingDate())
-                .createdAt(LocalDate.now())
-                .taskNoteStatus(TaskNoteStatus.PENDING_CONFIRMATION)
-                .build();
+        TaskNote taskNote = taskNoteMapper.toTaskNote(request);
+        taskNote.setTask(task);
+        taskNote.setAuthor(author);
+        taskNote.setCreatedAt(LocalDate.now());
+        taskNote.setTaskNoteStatus(TaskNoteStatus.PENDING_CONFIRMATION);
         TaskNote newTaskNote = taskNoteRepo.save(taskNote);
         taskNoteHelper.createTaskNoteNotification(newTaskNote, user);
         return toResponse(newTaskNote);
@@ -72,9 +71,7 @@ public class TaskNoteService {
         TimeHelper.checkWorkingDateInTask(
                 request.getWorkingDate(), taskNote.getTask().getStartAt(), taskNote.getTask().getEndAt());
 
-        taskNote.setContent(request.getContent());
-        taskNote.setWorkingHours(request.getWorkingHours());
-        taskNote.setWorkingDate(request.getWorkingDate());
+        taskNoteMapper.updateTaskNote(request, taskNote);
         taskNote.setUpdatedAt(LocalDate.now());
         return toResponse(taskNoteRepo.save(taskNote));
     }
@@ -115,20 +112,7 @@ public class TaskNoteService {
     }
 
     private TaskNoteResponse toResponse(TaskNote taskNote) {
-        ProjectMember author = taskNote.getAuthor();
-        return TaskNoteResponse.builder()
-                .id(taskNote.getId())
-                .taskId(taskNote.getTask().getId())
-                .employeeId(author.getUser().getId())
-                .employeeName(author.getUser().getUserName())
-                .employeeAvatarUrl(author.getUser().getAvatarUrl())
-                .content(taskNote.getContent())
-                .workingHours(taskNote.getWorkingHours())
-                .workingDate(taskNote.getWorkingDate())
-                .createdAt(taskNote.getCreatedAt())
-                .updatedAt(taskNote.getUpdatedAt())
-                .taskNoteStatus(taskNote.getTaskNoteStatus())
-                .build();
+        return taskNoteMapper.toTaskNoteResponse(taskNote);
     }
 
 }

@@ -13,6 +13,7 @@ import com.example.project_pulse_backend.helper.EarningTransactionHelper;
 import com.example.project_pulse_backend.helper.GetUserByToken;
 import com.example.project_pulse_backend.helper.ProjectHelper;
 import com.example.project_pulse_backend.helper.ProjectMemberHelper;
+import com.example.project_pulse_backend.mapper.EarningTransactionMapper;
 import com.example.project_pulse_backend.repository.EarningTransactionRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +31,7 @@ public class EarningTransactionService {
     private final ProjectMemberHelper projectMemberHelper;
     private final EarningTransactionHelper earningTransactionHelper;
     private final ProjectHelper projectHelper;
+    private final EarningTransactionMapper earningTransactionMapper;
 
     @PreAuthorize("hasAuthority('GET_EARNINGS_BY_PROJECT')")
     public List<EarningTransactionResponse> getByProject(
@@ -66,14 +68,11 @@ public class EarningTransactionService {
 
         earningTransactionHelper.checkAvailablePoint(source, request.getPoints());
 
-        EarningTransaction transfer = EarningTransaction.builder()
-                .task(source.getTask())
-                .executor(target)
-                .referenceTransaction(source)
-                .points(request.getPoints())
-                .earningTransactionType(EarningTransactionType.TRANSFER)
-                .reason(request.getReason())
-                .build();
+        EarningTransaction transfer = earningTransactionMapper.toTransfer(request);
+        transfer.setTask(source.getTask());
+        transfer.setExecutor(target);
+        transfer.setReferenceTransaction(source);
+        transfer.setEarningTransactionType(EarningTransactionType.TRANSFER);
         EarningTransaction newTransfer = earningTransactionRepo.save(transfer);
         earningTransactionHelper.getTransferFormTaskNotification(source, newTransfer);
         earningTransactionHelper.transferPointFormTaskNotification(source, newTransfer);
@@ -81,22 +80,6 @@ public class EarningTransactionService {
     }
 
     private EarningTransactionResponse toResponse(EarningTransaction transaction) {
-        var task = transaction.getTask();
-        var employee = transaction.getExecutor().getUser();
-        return EarningTransactionResponse.builder()
-                .id(transaction.getId())
-                .projectId(task.getPhase().getProject().getId())
-                .phaseId(task.getPhase().getId())
-                .phaseName(task.getPhase().getPhaseName())
-                .taskId(task.getId())
-                .taskName(task.getTaskName())
-                .employeeId(employee.getId())
-                .employeeName(employee.getUserName())
-                .referenceTransactionId(transaction.getReferenceTransaction() != null
-                        ? transaction.getReferenceTransaction().getId() : null)
-                .points(transaction.getPoints())
-                .earningTransactionType(transaction.getEarningTransactionType())
-                .reason(transaction.getReason())
-                .build();
+        return earningTransactionMapper.toEarningTransactionResponse(transaction);
     }
 }

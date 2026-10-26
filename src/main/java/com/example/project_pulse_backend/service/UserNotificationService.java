@@ -7,6 +7,7 @@ import com.example.project_pulse_backend.entity.User;
 import com.example.project_pulse_backend.entity.UserNotification;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.helper.GetUserByToken;
+import com.example.project_pulse_backend.mapper.UserNotificationMapper;
 import com.example.project_pulse_backend.repository.UserNotificationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +22,7 @@ import java.util.List;
 public class UserNotificationService {
     private final UserNotificationRepository userNotificationRepository;
     private final GetUserByToken getUserByToken;
+    private final UserNotificationMapper userNotificationMapper;
 
     @PreAuthorize("hasAuthority('GET_ALL_USER_NOTIFICATION')")
     public List<UserNotificationResponse> getByReceiver() {
@@ -69,18 +71,6 @@ public class UserNotificationService {
     }
 
     private UserNotificationResponse toResponse(UserNotification userNotification) {
-        return UserNotificationResponse.builder()
-                .id(userNotification.getId())
-                .senderId(userNotification.getSender().getId())
-                .senderName(userNotification.getSender().getUserName())
-                .receiverId(userNotification.getReceiver().getId())
-                .receiverName(userNotification.getReceiver().getUserName())
-                .notificationId(userNotification.getNotification().getId())
-                .notificationContent(userNotification.getNotification().getContent())
-                .notificationLink(userNotification.getNotification().getLink())
-                .notificationType(userNotification.getNotification().getType())
-                .read(userNotification.isRead())
-                .createdAt(userNotification.getCreatedAt())
-                .build();
+        return userNotificationMapper.toUserNotificationResponse(userNotification);
     }
 }
