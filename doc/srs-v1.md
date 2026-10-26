@@ -20,6 +20,7 @@
 - **Ngôn ngữ & Nền tảng:** Java 21, Spring Boot 3.3.5.
 - **Bảo mật & Xác thực:** Spring Security 6, Stateless JWT (Nimbus JOSE + JWT) mã hóa chữ ký HS512, cơ chế **2-step Role Selection** khi đăng nhập, kiểm soát quyền truy cập mức hàm (`@EnableMethodSecurity`, `@PreAuthorize`).
 - **Cơ sở dữ liệu:** MySQL 8, Spring Data JPA / Hibernate (DDL Auto: `update`).
+- **Ánh xạ dữ liệu:** MapStruct (`componentModel = "spring"`) tạo mapper dùng chung cho các chuyển đổi Entity–Request/Response tại helper và service. Logic nghiệp vụ, phân quyền dữ liệu và các giá trị tính toán như progress/allocationPoint vẫn được xử lý ở lớp tương ứng.
 - **Xử lý đồng thời (Concurrency Control):** Cơ chế khóa bi quan (Pessimistic Locking `PESSIMISTIC_WRITE` / `SELECT ... FOR UPDATE`) áp dụng tại:
   - **Phân bổ nhân sự (`Allocation`):** Khóa toàn bộ các bản ghi `project_member` của nhân viên (`lockAllProjectMembersByUserId`) nhằm ngăn ngừa xung đột dữ liệu (race condition) khi tính toán lịch làm việc và quét các ngày quá tải (`allocation_overloaded_dates`).
   - **Chuyển nhượng điểm thưởng (`transferEarn`):** Khóa bi quan bản ghi giao dịch `EarningTransaction` nguồn (`findByIdForUpdate`) để ngăn ngừa tuyệt đối nguy cơ rút quá số dư (`double-spending`) khi có nhiều yêu cầu chuyển điểm đồng thời.
@@ -63,7 +64,7 @@ Hệ thống hỗ trợ 3 vai trò chính. Một người dùng (`User`) có th�
 
 ---
 
-### 3.2 Ma trận phân quyền chi tiết (60 Permissions)
+### 3.2 Ma trận phân quyền chi tiết (63 Permissions)
 
 | Nhóm phân hệ | Mã Permission | Mô tả chức năng | ADMIN | PM | EMPLOYEE |
 | :--- | :--- | :--- | :---: | :---: | :---: |
@@ -113,8 +114,11 @@ Hệ thống hỗ trợ 3 vai trò chính. Một người dùng (`User`) có th�
 | | `TRANSFER_EARN` | PM chuyển nhượng điểm earn giữa các thành viên | ❌ | ✅ | ❌ |
 | **Task Cost** | `GET_TASK_COSTS_BY_PROJECT` | Xem lịch sử chi phí point tiêu thụ của dự án | ✅ | ✅ | ✅ |
 | | `GET_TASK_COSTS_BY_ID` | Xem chi tiết bản ghi chi phí task | ✅ | ✅ | ✅ |
-| **EVM Health** | `GET_EVM_BY_PHASE` | Xem báo cáo chỉ số EVM theo Phase | ✅ | ✅ | ❌ |
-| | `GET_EVM_BY_PROJECT` | Xem báo cáo chỉ số EVM theo Dự án | ✅ | ✅ | ❌ |
+| **EVM Health** | `GET_PROJECT_EVM_HEALTH` | Xem sức khỏe EVM tổng thể của dự án | ✅ | ✅ | ❌ |
+| | `GET_PROJECT_PHASES_EVM` | Xem các chỉ số EVM theo phase của dự án | ✅ | ✅ | ❌ |
+| | `GET_PROJECT_EMPLOYEES_EVM` | Xem hiệu suất EVM theo nhân viên trong dự án | ✅ | ✅ | ❌ |
+| | `GET_PROJECT_EVM_FINANCIAL_SUMMARY` | Xem tổng hợp tài chính EVM của dự án | ✅ | ✅ | ❌ |
+| | `EXPORT_PROJECT_EVM_CSV` | Xuất báo cáo EVM của dự án dạng CSV | ✅ | ✅ | ❌ |
 | **Statistics** | `GET_STATISTICS_SUMMARY` | Thống kê số lượng dự án, quá hạn, cận hạn | ✅ | ✅ | ❌ |
 | | `GET_PROJECT_STATUS_STATISTICS` | Thống kê cơ cấu dự án theo trạng thái (%) | ✅ | ✅ | ❌ |
 | | `GET_PROJECT_OVERVIEW_STATISTICS` | Thống kê tổng quan số lượng dự án theo trạng thái | ✅ | ✅ | ❌ |
@@ -156,7 +160,7 @@ Hệ thống hỗ trợ 3 vai trò chính. Một người dùng (`User`) có th�
 
 ### 4.3 Role & Permission
 - **Role (`roles`):** Khóa chính là `name` (`ADMIN`, `PM`, `EMPLOYEE`), `description`.
-- **Permission (`permissions`):** Khóa chính là `name` (60 quyền), `description`.
+- **Permission (`permissions`):** Khóa chính là `name` (63 quyền), `description`.
 - Liên kết nhiều-nhiều qua bảng `role_permission` (`role_name`, `permission_name`).
 
 ### 4.4 Project (`projects`)
@@ -557,8 +561,11 @@ Khi PM cập nhật trạng thái Task sang `DONE`:
 ### 7.11 Phân hệ EVM Health (`/api/evm`)
 | Method | Endpoint | Quyền (Authority) | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/evm/project/{projectId}` | `GET_EVM_BY_PROJECT` | Báo cáo toàn diện sức khỏe EVM của dự án (BAC, PV, EV, AC, CPI, SPI, EAC, ETC, VAC, TCPI) |
-| `GET` | `/api/evm/phase/{phaseId}` | `GET_EVM_BY_PHASE` | Báo cáo sức khỏe EVM của Phase (lấy từ snapshot nếu đã hoàn tất) |
+| `GET` | `/api/evm/project/{projectId}` | `GET_PROJECT_EVM_HEALTH` | Báo cáo sức khỏe EVM toàn dự án (BAC, PV, EV, AC, CPI, SPI, EAC, ETC, VAC, TCPI) |
+| `GET` | `/api/evm/project/{projectId}/phases` | `GET_PROJECT_PHASES_EVM` | Báo cáo các chỉ số EVM theo phase trong dự án |
+| `GET` | `/api/evm/project/{projectId}/employees` | `GET_PROJECT_EMPLOYEES_EVM` | Báo cáo hiệu suất EVM theo nhân viên trong dự án |
+| `GET` | `/api/evm/project/{projectId}/financial-summary` | `GET_PROJECT_EVM_FINANCIAL_SUMMARY` | Tổng hợp ngân sách và kết quả tài chính EVM; dữ liệu ngân sách khách hàng chỉ hiển thị cho ADMIN |
+| `GET` | `/api/evm/project/{projectId}/export-csv` | `EXPORT_PROJECT_EVM_CSV` | Tải báo cáo EVM dự án ở định dạng CSV UTF-8 |
 
 ### 7.12 Phân hệ Báo cáo thống kê Dashboard (`/api/statistics`)
 | Method | Endpoint | Quyền (Authority) | Mô tả |
