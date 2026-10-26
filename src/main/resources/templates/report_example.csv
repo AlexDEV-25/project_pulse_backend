@@ -1,0 +1,30 @@
+﻿## SECTION: SUMMARY
+=== BÁO CÁO QUẢN TRị GIÁ TRị THU ĐƯỢC (EVM) & TÀI CHÍNH DỰ ÁN ===
+Tên dự án
+Thời điểm xuất báo cáo
+Ngân sách kế hoạch nội bộ (BAC)
+Ngân sách hợp đồng khách hàng
+Giá trị theo kế hoạch (PV)
+Giá trị thu được (EV)
+Chi phí thực tế (AC)
+Chênh lệch chi phí (CV = EV - AC)
+Chênh lệch tiến độ (SV = EV - PV)
+Chỉ số hiệu quả chi phí (CPI)
+Chỉ số hiệu quả tiến độ (SPI)
+Dự toán chi phí khi hoàn thành (EAC)
+Dự toán chi phí còn lại (ETC)
+Chênh lệch ngân sách khi hoàn thành (VAC)
+Hiệu suất cần đạt để hoàn thành đúng hạn (TCPI)
+Tỷ lệ hoàn thành ngân sách nội bộ (EV / BAC)
+Tỷ lệ nghiệm thu hợp đồng khách hàng (EV / ClientBudget)
+Lợi nhuận gộp hiện tại (ClientBudget - AC)
+Tỷ suất lợi nhuận gộp (%)
+Lợi nhuận dự báo khi kết thúc (ClientBudget - EAC)
+
+## SECTION: PHASES
+=== CHỈ SỐ TIếN ĐỘ & EVM THEO TừNG GIAI ĐOẠN (PHASE BREAKDOWN) ===
+## COLUMNS: Mã Phase,Tên Phase,Ngày bắt đầu,Ngày kết thúc,Trạng thái,Tiến độ (%),BAC,PV,EV,AC,CV,SV,CPI,SPI,PV Lũy kế,EV Lũy kế,AC Lũy kế
+
+## SECTION: EMPLOYEES
+=== BÁO CÁO HIỆU SUẤT & ĐÓNG GÓP NHÂN SỰ (EMPLOYEE EV vs AC) ===
+## COLUMNS: Mã NV,Họ và tên,Vị trí,Đơn giá (Rate),Số Task xong,Tổng ngày công,Tổng AC (Chi phí),Tổng EV (Điểm tạo ra),Thặng dư (EV - AC),Hệ số ROI (EV/AC),Xếp loại

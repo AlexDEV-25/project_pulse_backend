@@ -21,5 +21,7 @@ public interface PhaseRepo extends JpaRepository<Phase, Long> {
 
     List<Phase> findByProject_Id(Long projectId);
 
+    List<Phase> findByProject_IdOrderByStartAtAscIdAsc(Long projectId);
+
     boolean existsByProject_IdAndStatusNot(Long projectId, PhaseStatus status);
 }

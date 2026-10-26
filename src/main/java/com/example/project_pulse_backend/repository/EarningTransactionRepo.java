@@ -115,4 +115,15 @@ public interface EarningTransactionRepo extends JpaRepository<EarningTransaction
     List<EarningTransaction> findByExecutor_Id(Long executorId);
 
     List<EarningTransaction> findByTask_Id(Long taskId);
+
+    @Query("""
+            SELECT earning.executor.user.id, COALESCE(SUM(earning.points), 0)
+            FROM EarningTransaction earning
+            WHERE earning.task.phase.project.id = :projectId
+              AND earning.earningTransactionType = :earnType
+            GROUP BY earning.executor.user.id
+            """)
+    List<Object[]> sumEarnedPointsGroupedByEmployee(
+            @Param("projectId") Long projectId,
+            @Param("earnType") EarningTransactionType earnType);
 }

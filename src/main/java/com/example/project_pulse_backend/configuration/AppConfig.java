@@ -126,10 +126,16 @@ public class AppConfig {
     }
 
     private void addEvmPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
-        checkPermissionAndSave(permissions, permissionRepository, "GET_EVM_BY_PHASE",
-                "Admin,PM thực hiện: Xem chỉ số EVM theo phase");
-        checkPermissionAndSave(permissions, permissionRepository, "GET_EVM_BY_PROJECT",
-                "Admin,PM thực hiện: Xem chỉ số EVM theo dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_EVM_HEALTH",
+                "Admin,PM xem sức khỏe EVM của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_PHASES_EVM",
+                "Admin,PM xem chỉ số EVM theo phase");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_EMPLOYEES_EVM",
+                "Admin,PM xem hiệu suất EVM theo nhân viên");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_PROJECT_EVM_FINANCIAL_SUMMARY",
+                "Admin,PM xem tổng hợp tài chính EVM của dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "EXPORT_PROJECT_EVM_CSV",
+                "Admin,PM xuất báo cáo EVM dạng CSV");
     }
 
     private void addProjectMemberPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
@@ -236,8 +242,10 @@ public class AppConfig {
                         "GET_MY_INFO", "UPDATE_AVATAR", "GET_STATISTICS_USERS", "UPDATE_USER", "CREATE_DEPARTMENT",
                         "UPDATE_DEPARTMENT", "DELETE_DEPARTMENT", "GET_STATISTICS_DEPARTMENTS", "CREATE_PROJECT",
                         "UPDATE_PROJECT", "DELETE_PROJECT", "GET_PROJECTS", "GET_PROJECT_BY_ID",
-                        "GET_PHASES_BY_PROJECT", "GET_PHASE_BY_ID", "GET_EVM_BY_PHASE",
-                        "GET_EVM_BY_PROJECT", "GET_PROJECT_MEMBERS_BY_PROJECT",
+                        "GET_PHASES_BY_PROJECT", "GET_PHASE_BY_ID",
+                        "GET_PROJECT_EVM_HEALTH", "GET_PROJECT_PHASES_EVM", "GET_PROJECT_EMPLOYEES_EVM",
+                        "GET_PROJECT_EVM_FINANCIAL_SUMMARY", "EXPORT_PROJECT_EVM_CSV",
+                        "GET_PROJECT_MEMBERS_BY_PROJECT",
                         "GET_TASKS_BY_PROJECT", "GET_TASK_BY_ID",
                         "GET_TASK_NOTES_BY_TASK", "GET_TASK_COSTS_BY_PROJECT", "GET_TASK_COSTS_BY_ID",
                         "GET_EARNINGS_BY_PROJECT", "GET_EARNINGS_BY_ID", "GET_ALLOCATIONS_BY_PROJECT",
@@ -252,7 +260,9 @@ public class AppConfig {
                         "CHANGE_PASSWORD", "GET_USERS", "GET_USER_BY_ID", "GET_MY_INFO", "UPDATE_AVATAR",
                         "GET_PROJECTS", "GET_PROJECT_BY_ID",
                         "CREATE_PHASE", "UPDATE_PHASE", "DELETE_PHASE", "GET_PHASES_BY_PROJECT",
-                        "GET_PHASE_BY_ID", "GET_EVM_BY_PHASE", "GET_EVM_BY_PROJECT",
+                        "GET_PHASE_BY_ID", "GET_PROJECT_EVM_HEALTH", "GET_PROJECT_PHASES_EVM",
+                        "GET_PROJECT_EMPLOYEES_EVM", "GET_PROJECT_EVM_FINANCIAL_SUMMARY",
+                        "EXPORT_PROJECT_EVM_CSV",
                         "CREATE_PROJECT_MEMBER", "DELETE_PROJECT_MEMBER", "GET_PROJECT_MEMBERS_BY_PROJECT",
                         "CREATE_TASK", "UPDATE_TASK", "DELETE_TASK", "GET_TASKS_BY_PROJECT", "GET_TASK_BY_ID",
                         "GET_TASK_NOTES_BY_TASK", "CONFIRM_TASK_NOTES",

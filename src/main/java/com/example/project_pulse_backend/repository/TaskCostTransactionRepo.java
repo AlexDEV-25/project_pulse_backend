@@ -45,4 +45,12 @@ public interface TaskCostTransactionRepo extends JpaRepository<TaskCostTransacti
     List<TaskCostTransaction> findByExecutor_Id(Long executorId);
 
     List<TaskCostTransaction> findByTask_Id(Long taskId);
+
+    @Query("""
+            SELECT cost.executor.user.id, COALESCE(SUM(cost.points), 0), COALESCE(SUM(cost.workdays), 0)
+            FROM TaskCostTransaction cost
+            WHERE cost.task.phase.project.id = :projectId
+            GROUP BY cost.executor.user.id
+            """)
+    List<Object[]> sumCostAndWorkdaysGroupedByEmployee(@Param("projectId") Long projectId);
 }

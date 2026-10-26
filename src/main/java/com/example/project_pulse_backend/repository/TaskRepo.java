@@ -57,4 +57,16 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
     List<Task> findAssignedTasksWithDetails(@Param("employeeId") Long employeeId);
 
     boolean existsByPhase_IdAndTaskStatusNotIn(Long phaseId, List<TaskStatus> statuses);
+
+    @Query("""
+            SELECT assignment.employee.user.id, COUNT(DISTINCT task.id)
+            FROM Task task
+            JOIN task.assignments assignment
+            WHERE task.phase.project.id = :projectId
+              AND task.taskStatus = :status
+            GROUP BY assignment.employee.user.id
+            """)
+    List<Object[]> countCompletedTasksGroupedByEmployee(
+            @Param("projectId") Long projectId,
+            @Param("status") TaskStatus status);
 }
