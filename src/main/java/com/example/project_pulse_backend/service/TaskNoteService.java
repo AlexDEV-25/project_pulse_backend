@@ -32,7 +32,6 @@ public class TaskNoteService {
     private final TaskNoteHelper taskNoteHelper;
     private final ProjectHelper projectHelper;
     private final ProjectMemberHelper projectMemberHelper;
-    private final TaskAssignmentHelper taskAssignmentHelper;
 
     @PreAuthorize("hasAuthority('CREATE_TASK_NOTE')")
     @Transactional
@@ -40,7 +39,6 @@ public class TaskNoteService {
         User user = getUserByToken.get();
         Task task = taskHelper.getById(request.getTaskId(), user);
         ProjectMember author = projectMemberHelper.findByProjectAndUser(task.getPhase().getProject(), user.getId(), user);
-        taskAssignmentHelper.checkBelongToTask(task.getId(), author);
 
         if (task.getTaskStatus() != TaskStatus.IN_PROGRESS) {
             throw AppException.builder().appError(AppError.TASK_NOT_IN_PROGRESS).build();
@@ -68,8 +66,6 @@ public class TaskNoteService {
         TaskNote taskNote = taskNoteRepo.findByIdForUpdate(noteId)
                 .orElseThrow(() -> AppException.builder().appError(AppError.TASK_NOTE_NOT_FOUND).build());
 
-        taskAssignmentHelper.checkBelongToTask(taskNote.getTask().getId(), taskNote.getAuthor());
-
         taskNoteHelper.checkAuthor(taskNote, user);
         taskNoteHelper.checkPendingConfirmation(taskNote);
 
@@ -89,8 +85,6 @@ public class TaskNoteService {
         User employee = getUserByToken.get();
         TaskNote taskNote = taskNoteRepo.findByIdForUpdate(noteId)
                 .orElseThrow(() -> AppException.builder().appError(AppError.TASK_NOTE_NOT_FOUND).build());
-
-        taskAssignmentHelper.checkBelongToTask(taskNote.getTask().getId(), taskNote.getAuthor());
 
         taskNoteHelper.checkAuthor(taskNote, employee);
         taskNoteHelper.checkPendingConfirmation(taskNote);
