@@ -25,7 +25,7 @@ public class NotificationHelper {
 
         return notificationRepository.save(notification);
     }
-    
+
     public void createUserNotification(CreateUserNotificationRequest request) {
 
         UserNotification notification = notificationMapper.toUserNotification(request);
@@ -66,13 +66,9 @@ public class NotificationHelper {
         return String.format("Bạn đã được loại bỏ khỏi task %s ", taskName);
     }
 
-    public String linkToTask() {
-        return "/projects?tab=tasks";
-    }
-
     public String linkToTask(Long projectId, Long taskId) {
         if (projectId == null) {
-            return linkToTask();
+            return "/projects?tab=tasks";
         }
         if (taskId == null) {
             return String.format("/projects/%d?tab=tasks", projectId);
@@ -80,25 +76,23 @@ public class NotificationHelper {
         return String.format("/projects/%d?tab=tasks&taskId=%d", projectId, taskId);
     }
 
-    public String linkToEarn() {
-        return "/projects?tab=earnings";
-    }
-
-    public String linkToEarn(Long projectId) {
+    public String linkToEarn(Long projectId, Long transactionId) {
         if (projectId == null) {
-            return linkToEarn();
+            return "/projects?tab=earnings";
         }
-        return String.format("/projects/%d?tab=earnings", projectId);
+        if (transactionId == null) {
+            return String.format("/projects/%d?tab=earnings", projectId);
+        }
+        return String.format("/projects/%d?tab=earnings&transactionId=%d", projectId, transactionId);
     }
 
-    public String linkToTransfer() {
-        return "/projects?tab=earnings&type=TRANSFER";
-    }
-
-    public String linkToTransfer(Long projectId) {
+    public String linkToTransfer(Long projectId, Long transactionId) {
         if (projectId == null) {
-            return linkToTransfer();
+            return "/projects?tab=earnings&type=TRANSFER";
         }
-        return String.format("/projects/%d?tab=earnings&type=TRANSFER", projectId);
+        if (transactionId == null) {
+            return String.format("/projects/%d?tab=earnings&type=TRANSFER", projectId);
+        }
+        return String.format("/projects/%d?tab=earnings&type=TRANSFER&transactionId=%d", projectId, transactionId);
     }
 }

@@ -50,7 +50,7 @@ public class TransactionHelper {
         Notification notification = notificationHelper.createNotification(NotificationRequest.builder()
                 .content(notificationHelper.getPointFormTaskNotification(
                         points, newEarningTransaction.getTask().getTaskName()))
-                .link(notificationHelper.linkToEarn(projectId))
+                .link(notificationHelper.linkToEarn(projectId, newEarningTransaction.getId()))
                 .type(NotificationType.INFO)
                 .build());
 

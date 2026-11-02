@@ -85,7 +85,7 @@ public class EarningTransactionHelper {
         Notification notification = notificationHelper.createNotification(NotificationRequest.builder()
                 .content(notificationHelper.getTransferFormTaskNotification(
                         points, newTransfer.getTask().getTaskName(), source.getExecutor().getUser().getUserName()))
-                .link(notificationHelper.linkToTransfer(projectId))
+                .link(notificationHelper.linkToTransfer(projectId, newTransfer.getId()))
                 .type(NotificationType.INFO)
                 .build());
 
@@ -112,7 +112,7 @@ public class EarningTransactionHelper {
         Notification notification = notificationHelper.createNotification(NotificationRequest.builder()
                 .content(notificationHelper.transferPointFormTaskNotification(
                         points, newTransfer.getTask().getTaskName(), newTransfer.getExecutor().getUser().getUserName()))
-                .link(notificationHelper.linkToTransfer(projectId))
+                .link(notificationHelper.linkToTransfer(projectId, newTransfer.getId()))
                 .type(NotificationType.INFO)
                 .build());
 
