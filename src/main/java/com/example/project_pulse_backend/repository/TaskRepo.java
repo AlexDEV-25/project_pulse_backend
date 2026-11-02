@@ -3,12 +3,14 @@ package com.example.project_pulse_backend.repository;
 import com.example.project_pulse_backend.constant.TaskStatus;
 import com.example.project_pulse_backend.entity.Task;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +44,30 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
     BigDecimal sumTaskPointsByPhaseId(@Param("phaseId") Long phaseId);
 
     List<Task> findByPhase_Id(Long phaseId);
+
+    @EntityGraph(attributePaths = {
+            "phase.project",
+            "assignments",
+            "assignments.employee",
+            "assignments.employee.user"
+    })
+    @Query("""
+            SELECT DISTINCT task
+            FROM Task task
+            WHERE task.phase.id IN :phaseIds
+              AND task.startAt <= :selectedDate
+              AND task.endAt >= :selectedDate
+              AND EXISTS (
+                  SELECT assignment.id
+                  FROM TaskAssignment assignment
+                  WHERE assignment.task = task
+                    AND assignment.employee.user.id = :employeeId
+              )
+            """)
+    List<Task> findAssignedTasksByPhaseIdsAndDate(
+            @Param("phaseIds") List<Long> phaseIds,
+            @Param("employeeId") Long employeeId,
+            @Param("selectedDate") LocalDate selectedDate);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Task> findForUpdateById(Long id);

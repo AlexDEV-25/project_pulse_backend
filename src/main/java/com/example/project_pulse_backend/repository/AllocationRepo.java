@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,9 @@ public interface AllocationRepo extends JpaRepository<Allocation, Long> {
     List<Allocation> findAllByMember_User_Id(Long userId);
 
     List<Allocation> findByPhase_Id(Long phaseId);
+
+    @EntityGraph(attributePaths = {"phase.project", "member"})
+    List<Allocation> findAllByMember_User_IdAndPhase_IdIn(Long userId, Collection<Long> phaseIds);
 
     @EntityGraph(attributePaths = {"overloadedDates"})
     @Query("""

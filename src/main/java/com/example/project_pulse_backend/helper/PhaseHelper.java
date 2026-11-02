@@ -4,6 +4,7 @@ import com.example.project_pulse_backend.constant.AppError;
 import com.example.project_pulse_backend.constant.EarningTransactionType;
 import com.example.project_pulse_backend.constant.PhaseStatus;
 import com.example.project_pulse_backend.constant.TaskStatus;
+import com.example.project_pulse_backend.dto.response.PhaseWorkingDays;
 import com.example.project_pulse_backend.entity.Phase;
 import com.example.project_pulse_backend.entity.Project;
 import com.example.project_pulse_backend.entity.Task;
@@ -36,6 +37,24 @@ public class PhaseHelper {
     public List<Phase> getPhasesByProject(Long projectId, User user, String keyword) {
         projectHelper.checkAccessToProject(projectId, user);
         return phaseRepo.filterPhase(projectId, keyword);
+    }
+
+    public List<PhaseWorkingDays> getEmployeePhasesForWeek(
+            User employee, LocalDate weekStart, LocalDate weekEnd) {
+        List<Phase> phases = phaseRepo.findAllocatedPhasesOverlappingWeek(
+                employee.getId(), weekStart, weekEnd);
+
+        return phases.stream()
+                .map(phase -> {
+                    LocalDate startAt = phase.getStartAt().isAfter(weekStart)
+                            ? phase.getStartAt() : weekStart;
+                    LocalDate endAt = phase.getEndAt().isBefore(weekEnd)
+                            ? phase.getEndAt() : weekEnd;
+                    Set<LocalDate> workingDates = TimeHelper.workingDates(
+                            startAt, endAt, phase.getMakeUpDates(), phase.getOffDates());
+                    return new PhaseWorkingDays(phase, workingDates);
+                })
+                .toList();
     }
 
     public Phase getPhaseById(Long id, User user) {

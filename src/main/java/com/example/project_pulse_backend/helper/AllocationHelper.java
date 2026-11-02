@@ -1,6 +1,8 @@
 package com.example.project_pulse_backend.helper;
 
 import com.example.project_pulse_backend.constant.AppError;
+import com.example.project_pulse_backend.dto.response.PhaseWorkingDays;
+import com.example.project_pulse_backend.dto.response.ScheduledAllocation;
 import com.example.project_pulse_backend.entity.*;
 import com.example.project_pulse_backend.exception.AppException;
 import com.example.project_pulse_backend.repository.AllocationRepo;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +29,33 @@ public class AllocationHelper {
         Project project = projectHelper.getProjectById(projectId, user);
         return allocationRepo.filterAllocation(project.getId(), phaseId, keyword,
                 RoleHelper.checkIsEmployee(user) ? user.getId() : null);
+    }
+
+    public List<ScheduledAllocation> getEmployeeAllocations(
+            User employee, List<PhaseWorkingDays> phases) {
+        if (phases.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, PhaseWorkingDays> phaseById = phases.stream()
+                .collect(Collectors.toMap(item -> item.phase().getId(), item -> item));
+        List<Allocation> allocations = allocationRepo.findAllByMember_User_IdAndPhase_IdIn(
+                employee.getId(), phaseById.keySet());
+
+        return allocations.stream()
+                .map(allocation -> {
+                    Phase phase = allocation.getPhase();
+                    Project project = phase.getProject();
+                    return new ScheduledAllocation(
+                            project.getId(),
+                            project.getProjectName(),
+                            phase.getId(),
+                            phase.getPhaseName(),
+                            allocation.getId(),
+                            allocation.getAllocationPercentage(),
+                            phaseById.get(phase.getId()).workingDates());
+                })
+                .toList();
     }
 
     public Allocation getAllocationById(Long id, User user) {

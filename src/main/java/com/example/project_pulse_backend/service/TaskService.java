@@ -16,8 +16,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +107,38 @@ public class TaskService {
 
         String normalizedKeyword = keyword == null || keyword.isBlank() ? null : keyword.trim();
         return taskHelper.getProjectById(projectId, user, phaseId, normalizedKeyword, userId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @PreAuthorize("hasAuthority('GET_EMPLOYEE_WORK_SCHEDULE_TASKS')")
+    public List<TaskResponse> getMyTasksByDate(LocalDate selectedDate, List<Long> phaseIds) {
+        User employee = getUserByToken.get();
+        if (phaseIds == null || phaseIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> requestedPhaseIds = phaseIds.stream()
+                .filter(Objects::nonNull)
+                .filter(id -> id > 0)
+                .distinct()
+                .toList();
+        if (requestedPhaseIds.isEmpty()) {
+            return List.of();
+        }
+
+        TimeHelper.WeekRange week = TimeHelper.weekRange(selectedDate);
+        List<Long> employeePhaseIds = phaseHelper.getEmployeePhasesForWeek(
+                        employee, week.weekStart(), week.weekEnd()).stream()
+                .map(phase -> phase.phase().getId())
+                .filter(requestedPhaseIds::contains)
+                .toList();
+        if (employeePhaseIds.isEmpty()) {
+            return List.of();
+        }
+
+        return taskRepo.findAssignedTasksByPhaseIdsAndDate(
+                        employeePhaseIds, employee.getId(), selectedDate).stream()
                 .map(this::toResponse)
                 .toList();
     }

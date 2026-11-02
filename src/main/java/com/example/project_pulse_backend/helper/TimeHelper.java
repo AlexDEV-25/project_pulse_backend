@@ -6,12 +6,22 @@ import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 @Component
 public class TimeHelper {
+    public static WeekRange weekRange(LocalDate date) {
+        LocalDate weekStart = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate weekEnd = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        return new WeekRange(weekStart, weekEnd);
+    }
+
+    public record WeekRange(LocalDate weekStart, LocalDate weekEnd) {
+    }
+
     // tính ngày làm việc trong phase
     public static Set<LocalDate> workingDates(
             LocalDate startAt,

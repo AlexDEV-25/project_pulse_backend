@@ -203,6 +203,10 @@ public class AppConfig {
                 "Admin,PM,Employee xem danh sách phân bổ nhân lực trong dự án");
         checkPermissionAndSave(permissions, permissionRepository, "GET_ALLOCATIONS_BY_ID",
                 "Admin,PM,Employee xem chi tiết phân bổ nhân lực trong dự án");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EMPLOYEE_WORK_SCHEDULE",
+                "Employee xem lịch làm việc hàng tuần của mình");
+        checkPermissionAndSave(permissions, permissionRepository, "GET_EMPLOYEE_WORK_SCHEDULE_TASKS",
+                "Employee xem công việc của mình theo ngày trong lịch tuần");
     }
 
     private void addStatisticsPermissions(List<Permission> permissions, PermissionRepo permissionRepository) {
@@ -285,6 +289,7 @@ public class AppConfig {
                         "GET_EARNINGS_BY_ID", "GET_EMPLOYEE_STATISTICS_SUMMARY",
                         "GET_EMPLOYEE_PROJECT_POINT_STATISTICS", "GET_EMPLOYEE_TASK_STATISTICS",
                         "GET_PROJECTS", "GET_PROJECT_BY_ID", "GET_TASK_BY_ID",
+                        "GET_EMPLOYEE_WORK_SCHEDULE", "GET_EMPLOYEE_WORK_SCHEDULE_TASKS",
                         "GET_ALL_USER_NOTIFICATION", "GET_UNREAD_USER_NOTIFICATION",
                         "READ_NOTIFICATION", "READ_ALL_NOTIFICATION"));
     }
