@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeTaskStatisticsResponse {
+    private Long projectId;
+    private Long taskId;
     private String projectName;
     private String taskName;
     private LocalDate endAt;

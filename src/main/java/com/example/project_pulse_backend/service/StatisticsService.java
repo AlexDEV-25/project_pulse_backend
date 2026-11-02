@@ -190,6 +190,8 @@ public class StatisticsService {
         return taskRepo.findAssignedTasksWithDetails(user.getId()).stream()
                 .filter(task -> StatisticsHelper.isInProgressOrNearingDeadline(task, now, nearingDeadline))
                 .map(task -> EmployeeTaskStatisticsResponse.builder()
+                        .projectId(task.getPhase().getProject().getId())
+                        .taskId(task.getId())
                         .projectName(task.getPhase().getProject().getProjectName())
                         .taskName(task.getTaskName())
                         .endAt(task.getEndAt())
