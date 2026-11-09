@@ -1,4 +1,4 @@
-# SRS v1 - Project Pulse Backend (Đặc tả yêu cầu phần mềm)
+# SRS v1 - Project Pulse Backend (Đặc tả yêu cầu phần mềm, cập nhật API)
 
 ## 1. Mục tiêu hệ thống
 **Project Pulse** là nền tảng quản trị dự án thông minh theo mô hình điểm số đóng góp (**Point-based Management**) kết hợp phương pháp quản trị giá trị thu được quốc tế (**Earned Value Management - EVM**). Hệ thống cung cấp giải pháp toàn diện cho doanh nghiệp:
@@ -10,6 +10,7 @@
 - Tính toán tự động và trực quan hóa bộ chỉ số đo lường sức khỏe dự án EVM (BAC, PV, EV, AC, CV, SV, CPI, SPI, EAC, ETC, VAC, TCPI).
 - Quản lý thông báo người dùng theo thời gian thực (Notification) với deep linking trực tiếp tới trang và component liên quan (Nhiệm vụ, Điểm thưởng, Chuyển nhượng).
 - Cung cấp hệ thống Dashboard thống kê phân quyền đa chiều dành cho Admin, Project Manager và Employee.
+- Cung cấp lịch phân bổ theo tuần và danh sách task của nhân viên theo ngày, có thể lọc theo phase.
 
 > [!NOTE]
 > Hệ thống được thiết kế theo nguyên tắc **bảo mật thông tin tiền lương trực tiếp**. Đơn giá tài nguyên (`resourceRate`), snapshot đơn giá (`resourceRateSnapshot`), ngân sách khách hàng (`clientBudget`), và các giao dịch point (Earning / Cost) là các chỉ số nội bộ phục vụ quy đổi, kiểm soát ngân sách và đánh giá hiệu suất, được phân quyền hiển thị nghiêm ngặt theo vai trò.
@@ -64,7 +65,7 @@ Hệ thống hỗ trợ 3 vai trò chính. Một người dùng (`User`) có th�
 
 ---
 
-### 3.2 Ma trận phân quyền chi tiết (63 Permissions)
+### 3.2 Ma trận phân quyền chi tiết (65 Permissions)
 
 | Nhóm phân hệ | Mã Permission | Mô tả chức năng | ADMIN | PM | EMPLOYEE |
 | :--- | :--- | :--- | :---: | :---: | :---: |
@@ -98,6 +99,8 @@ Hệ thống hỗ trợ 3 vai trò chính. Một người dùng (`User`) có th�
 | | `DELETE_ALLOCATION` | Xóa phân bổ nhân sự | ❌ | ✅ | ❌ |
 | | `GET_ALLOCATIONS_BY_PROJECT`| Xem danh sách phân bổ trong dự án/phase | ✅ | ✅ | ✅ |
 | | `GET_ALLOCATIONS_BY_ID` | Xem chi tiết bản ghi phân bổ | ✅ | ✅ | ✅ |
+| | `GET_EMPLOYEE_WORK_SCHEDULE` | Nhân viên xem lịch phân bổ của mình theo tuần | ❌ | ❌ | ✅ |
+| | `GET_EMPLOYEE_WORK_SCHEDULE_TASKS` | Nhân viên xem task được giao theo ngày và phase | ❌ | ❌ | ✅ |
 | **Task & Assignment**| `CREATE_TASK` | Tạo task và gán danh sách nhân sự đóng góp | ❌ | ✅ | ❌ |
 | | `UPDATE_TASK` | Cập nhật task, phân công lại, chốt hoàn thành | ❌ | ✅ | ❌ |
 | | `DELETE_TASK` | Xóa task (chỉ khi task ở trạng thái TODO và chưa có task note) | ❌ | ✅ | ❌ |
@@ -294,7 +297,7 @@ Hệ thống hỗ trợ 3 vai trò chính. Một người dùng (`User`) có th�
   - `pv` (BigDecimal, Planned Value)
   - `ev` (BigDecimal, Earned Value)
   - `ac` (BigDecimal, Actual Cost)
-- **Ý nghĩa:** Khi người dùng xem chỉ số sức khỏe của Phase đã hoàn thành (`GET /api/evm/phase/{phaseId}`), hệ thống đọc trực tiếp dữ liệu từ snapshot lịch sử thay vì tính toán động, đảm bảo tính chuẩn xác và bất biến của dữ liệu quá khứ.
+- **Ý nghĩa:** Khi xem báo cáo phase qua `GET /api/evm/project/{projectId}/phases`, dữ liệu EVM của phase đã hoàn thành được lấy từ snapshot lịch sử thay vì tính toán động, bảo đảm tính bất biến của dữ liệu quá khứ.
 
 ### 4.13 Notification (`notifications`) & UserNotification (`user_notification`)
 - **Notification (`notifications`):** Nội dung thông báo dùng chung hoặc được liên kết:
@@ -587,6 +590,12 @@ Khi PM cập nhật trạng thái Task sang `DONE`:
 | `PUT` | `/api/user-notifications/read/{id}` | `READ_NOTIFICATION` | Đánh dấu thông báo cụ thể là đã đọc (bảo mật kiểm tra người nhận) |
 | `PUT` | `/api/user-notifications/read-all` | `READ_ALL_NOTIFICATION` | Đánh dấu tất cả thông báo chưa đọc của người dùng là đã đọc |
 | `PUT` | `/api/user-notifications/read-all/{id}` | `READ_ALL_NOTIFICATION` | Đánh dấu tất cả thông báo của người dùng là đã đọc (hỗ trợ tương thích endpoint) |
+
+### 7.14 Phân hệ Lịch làm việc nhân viên (`/api/employee`)
+| Method | Endpoint | Quyền (Authority) | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/employee/work-schedule` | `GET_EMPLOYEE_WORK_SCHEDULE` | Trả về lịch từ thứ Hai đến Chủ Nhật cho tuần chứa `date` (ISO `yyyy-MM-dd`); nếu bỏ qua `date`, dùng ngày hiện tại. Mỗi ngày có cờ `isWorkingDay` và danh sách allocation đang áp dụng. |
+| `GET` | `/api/employee/work-schedule/tasks` | `GET_EMPLOYEE_WORK_SCHEDULE_TASKS` | Trả về task được giao cho ngày `date` (bắt buộc, ISO `yyyy-MM-dd`); `phaseIds` là bộ lọc phase tùy chọn. Nếu thiếu phase hợp lệ hoặc không có task phù hợp, trả danh sách rỗng. |
 
 ---
 
